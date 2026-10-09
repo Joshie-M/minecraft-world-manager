@@ -274,3 +274,30 @@ Six added tests cover matching semantics, world isolation, live results, reading
 navigation, narrow dark and wide light layouts, draft row validation/removal,
 and atomic project/task persistence. Mac runtime verification remains a user
 check after pulling the update.
+
+## Portable backup and additive restore
+
+Backup version 1 is a JSON snapshot of all seven application tables, with a
+format marker and creation timestamp. Export reads in a transaction for a
+consistent snapshot and validates the result against the same parser used by
+restore. The parser checks table structure, types, names/statuses, unique IDs,
+task positions, parent references, and world ownership. Reads are bounded to
+20 MB, including streamed reads when the file size is unknown.
+
+Restore adds copies with fresh IDs rather than merging or overwriting records.
+World names receive a restored suffix, linked project locations and journal tag
+associations use new IDs, and active inline mention destinations are remapped.
+Code examples stay literal. Missing mention targets receive unused IDs to avoid
+accidentally connecting to an existing record. All inserts share one transaction;
+errors roll back the entire restore. Preview and confirmation are required in the
+UI. Busy operations disable navigation and duplicate actions; cancellation is
+quiet and failures leave existing data intact.
+
+The file adapter uses file_picker 13.1.0 for system dialogs across supported
+platforms, with the resolved dependency graph committed. Mac debug and release
+entitlements grant access only to files selected by the user. No database schema
+migration is needed. Seven added tests cover disk reopen, repeat restores, linked
+records and task state, malformed and cross-world inputs, a late SQL failure,
+empty backups, confirmation/cancellation/error flows at narrow dark and wide
+light sizes, and navigation during a pending save. Native picker behavior on Mac
+and the other platforms requires device verification after updating the app.

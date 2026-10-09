@@ -7,7 +7,7 @@ notes, saved coordinates, world projects, search, and local SQLite persistence.
 
 - Linux release build succeeded.
 - Static analysis passed with no issues.
-- Forty-three tests passed: disk CRUD/reopen, invalid data handling, world/journal UI CRUD, keyboard shortcuts,
+- Fifty tests passed: disk CRUD/reopen, invalid data handling, world/journal UI CRUD, keyboard shortcuts,
   world isolation, migrations, coordinate validation/clipboard copying, project/location relationships, inline @mentions/autocomplete/hover previews, project checklists, and responsive light/dark layouts.
 - The compiled desktop app created a world through its UI. After stopping and
   restarting the process, the world appeared again on its dashboard. A journal
@@ -196,3 +196,30 @@ prepare its initial checklist. Draft tasks can be edited or removed before savin
 The project and tasks save together; canceling discards both, and a failed save
 keeps your draft in the form. Existing projects keep their checklist controls in
 the project reading view. No database migration or dependency changes are needed.
+
+## Backup & restore
+
+From **Your worlds**, choose the **Backup & restore** toolbar icon.
+**Save backup** exports all World Manager worlds, journal entries, locations,
+projects, tasks, and journal associations to a portable `.json` file using the
+system save dialog. Checklist completion, task order, timestamps, coordinates,
+project locations, and internal journal links are included.
+
+**Choose backup** validates the file and previews record counts before you choose
+**Restore copies**. Restored worlds have “(restored)” in their names. Their records
+receive new IDs and journal links are remapped to the restored locations/projects.
+Existing worlds remain untouched. Restoring the same file again adds another set
+of copies; it does not merge or replace records. Missing mention targets remain
+unavailable. Restore runs in one transaction, so failure leaves no partial import.
+
+The versioned backup format rejects unsupported versions, invalid records,
+duplicate IDs, orphan records, and cross-world associations. Files are limited to
+20 MB. Backups contain plain text and coordinates; keep them somewhere you trust.
+These are World Manager records, not Minecraft's game save folders.
+
+Native file dialogs use `file_picker`, with user-selected read/write access enabled
+for macOS debug and release builds. Restart and rebuild the Mac app after pulling
+this change so the plugin and entitlements are installed. File dialog behavior on
+macOS, Windows, iOS, and Android still needs verification on those platforms;
+cloud checks cover database round trips, UI flows with an injected file adapter,
+and the Linux build.

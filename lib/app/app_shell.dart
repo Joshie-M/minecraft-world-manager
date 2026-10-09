@@ -3,8 +3,13 @@ import 'package:flutter/material.dart';
 import 'theme.dart';
 
 class AppShell extends StatelessWidget {
-  const AppShell({super.key, required this.child});
+  const AppShell({
+    super.key,
+    required this.child,
+    this.navigationEnabled = true,
+  });
   final Widget child;
+  final bool navigationEnabled;
   @override
   Widget build(BuildContext context) => Scaffold(
     body: SafeArea(
@@ -54,9 +59,11 @@ class AppShell extends StatelessWidget {
                             alpha: .1,
                           ),
                         ),
-                        onPressed: () => Navigator.of(
-                          context,
-                        ).popUntil((route) => route.isFirst),
+                        onPressed: navigationEnabled
+                            ? () => Navigator.of(
+                                context,
+                              ).popUntil((route) => route.isFirst)
+                            : null,
                         icon: Icon(
                           CupertinoIcons.square_grid_2x2,
                           size: 16,

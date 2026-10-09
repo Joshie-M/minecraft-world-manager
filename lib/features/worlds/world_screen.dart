@@ -13,6 +13,7 @@ import '../journal/entry_reader.dart';
 import '../projects/projects_screen.dart';
 import '../locations/locations_screen.dart';
 import '../search/world_search.dart';
+import '../backup/backup_screen.dart';
 
 class WorldScreen extends ConsumerWidget {
   const WorldScreen({super.key});
@@ -43,6 +44,16 @@ class WorldScreen extends ConsumerWidget {
                         'Your worlds',
                         style: theme.textTheme.titleLarge,
                       ),
+                    ),
+                    IconButton(
+                      tooltip: 'Backup & restore',
+                      onPressed: () => Navigator.push(
+                        context,
+                        MaterialPageRoute<void>(
+                          builder: (_) => const BackupScreen(),
+                        ),
+                      ),
+                      icon: const Icon(CupertinoIcons.arrow_down_doc, size: 18),
                     ),
                     Tooltip(
                       message: 'New world (⌘N / Ctrl+N)',
