@@ -155,3 +155,40 @@ and preserved three worlds, one journal entry and one location. A separately see
 demo project rendered its notes and linked coordinates in the compiled reading UI.
 Synthetic keyboard input did not reach the fields in this headless session; compiled
 UI creation was not verified. macOS project validation remains on the user's machine.
+
+## Record relationships and journal tags
+
+The user confirmed projects working on macOS and requested reverse navigation
+from locations to projects plus journal tags with hover cards. Location reading
+dialogs now follow live world-owned locations and projects; all linked projects,
+including Complete, are shown with status and explicit reading navigation.
+
+Schema 5 adds JournalLocationTags and JournalProjectTags with composite primary
+keys and cascading foreign keys to entries and tagged records. Journal saves
+validate reference ownership and save content and both tag sets atomically.
+Omitting a tag set preserves it; passing an empty set removes that type's tags.
+Deleting a record removes its associations, preserving journal text. Tag streams
+join entries to enforce world scope. No new package dependency.
+
+Editors hydrate saved associations before enabling save, preserve text on load
+or write errors, and include tag selections in dirty tracking. Missing selected
+records appear as removable unavailable chips. Tag picker and reader share compact
+preview cards, using tooltip hover on desktop; reader tags open live detail dialogs
+on click/tap. Project cards include status, notes and linked location coordinates.
+These tags are record links attached to the entry, not inline Markdown mentions
+or free-form labels. Save errors are visible above the editor's scrolling content.
+
+Verification: schema-4 migration/reopen, atomic ownership rejection, replacement,
+reference deletion/entry deletion/world deletion cleanup, responsive mobile dark
+and desktop light flows, hover cards, tag hydration/removal, tag-only dirty checks,
+live project rename/navigation, completed-project display, and stale-tag save-error
+recovery. Existing CRUD tests remain enabled. macOS verification of this increment
+remains local to the user's machine.
+
+All 26 tests passed; analysis is clean and the final Linux release build passed.
+The compiled app upgraded the isolated demo database from schema 4 to 5, preserving
+three worlds, a journal entry, a location and a project. Demo tag associations were
+seeded separately for the visual check; the compiled reading view displayed their
+hover card and the location's project list. Screenshots are committed under docs.
+Headless GTK startup required GDK_BACKEND=x11 with Xvfb; the README records that
+runtime choice. No real platform-specific macOS build was run in the cloud.

@@ -4,6 +4,7 @@ import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../app/app_shell.dart';
 import 'entry_editor.dart';
+import 'journal_tags.dart';
 import 'journal_repository.dart';
 import 'journal_screen.dart';
 
@@ -130,6 +131,7 @@ class EntryReader extends ConsumerWidget {
                                 color: theme.colorScheme.onSurfaceVariant,
                               ),
                             ),
+                            JournalTags(worldId: worldId, entryId: entryId),
                             const SizedBox(height: 28),
                             if (entry.body.trim().isEmpty)
                               Text(

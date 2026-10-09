@@ -6,6 +6,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../app/labeled_field.dart';
 import '../../core/database/app_database.dart';
 import 'journal_repository.dart';
+import 'journal_tags.dart';
+import 'package:flutter/foundation.dart';
 import 'journal_screen.dart';
 
 class EntryEditor extends ConsumerStatefulWidget {
@@ -32,15 +34,57 @@ class _EntryEditorState extends ConsumerState<EntryEditor> {
   late final initialDate = occurredAt;
   bool saving = false, preview = false, allowLeave = false;
   String? error;
+  Set<String> locationIds = {},
+      projectIds = {},
+      initialLocations = {},
+      initialProjects = {};
+  bool tagsReady = false;
+  String? tagError;
+  Future<void> loadTags() async {
+    try {
+      final id = widget.entry?.id;
+      final locations = id == null
+          ? <String>{}
+          : await ref.read(
+              entryLocationTagsProvider((widget.worldId, id)).future,
+            );
+      if (!mounted) return;
+      final projects = id == null
+          ? <String>{}
+          : await ref.read(
+              entryProjectTagsProvider((widget.worldId, id)).future,
+            );
+      if (mounted) {
+        setState(() {
+          locationIds = {...locations};
+          projectIds = {...projects};
+          initialLocations = {...locations};
+          initialProjects = {...projects};
+          tagsReady = true;
+          tagError = null;
+        });
+      }
+    } catch (_) {
+      if (mounted) setState(() => tagError = 'Could not load saved tags.');
+    }
+  }
+
+  void toggle(Set<String> ids, String id) => setState(() {
+    if (!ids.remove(id)) ids.add(id);
+  });
+
   bool get dirty =>
       title.text != (widget.entry?.title ?? '') ||
       notes.text != (widget.entry?.body ?? '') ||
-      occurredAt != initialDate;
+      occurredAt != initialDate ||
+      !setEquals(locationIds, initialLocations) ||
+      !setEquals(projectIds, initialProjects);
   @override
   void initState() {
     super.initState();
     title.addListener(changed);
     notes.addListener(changed);
+    loadTags();
   }
 
   void changed() {
@@ -90,7 +134,7 @@ class _EntryEditorState extends ConsumerState<EntryEditor> {
   }
 
   Future<void> save() async {
-    if (saving || !form.currentState!.validate()) return;
+    if (saving || !tagsReady || !form.currentState!.validate()) return;
     setState(() {
       saving = true;
       error = null;
@@ -104,6 +148,8 @@ class _EntryEditorState extends ConsumerState<EntryEditor> {
             title: title.text,
             body: notes.text,
             occurredAt: occurredAt,
+            locationIds: locationIds,
+            projectIds: projectIds,
           );
       await leave(saved: true);
     } catch (_) {
@@ -197,13 +243,24 @@ class _EntryEditorState extends ConsumerState<EntryEditor> {
                         ),
                       ),
                       FilledButton(
-                        onPressed: saving ? null : save,
+                        onPressed: saving || !tagsReady ? null : save,
                         child: Text(saving ? 'Saving…' : 'Save entry'),
                       ),
                     ],
                   ),
                 ),
                 const Divider(),
+                if (error != null)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 8,
+                    ),
+                    child: Text(
+                      error!,
+                      style: TextStyle(color: theme.colorScheme.error),
+                    ),
+                  ),
                 Expanded(
                   child: Align(
                     alignment: Alignment.topCenter,
@@ -257,6 +314,23 @@ class _EntryEditorState extends ConsumerState<EntryEditor> {
                               ),
                             ],
                           ),
+                          const SizedBox(height: 20),
+                          if (tagError != null)
+                            TextButton(
+                              onPressed: loadTags,
+                              child: Text('$tagError Retry'),
+                            )
+                          else if (!tagsReady)
+                            const CupertinoActivityIndicator()
+                          else
+                            JournalTagPicker(
+                              worldId: widget.worldId,
+                              locationIds: locationIds,
+                              projectIds: projectIds,
+                              onLocation: (id) => toggle(locationIds, id),
+                              onProject: (id) => toggle(projectIds, id),
+                              enabled: !saving,
+                            ),
                           const SizedBox(height: 20),
                           Wrap(
                             spacing: 8,
@@ -324,16 +398,6 @@ class _EntryEditorState extends ConsumerState<EntryEditor> {
                             'Markdown: **bold**, *italic*, # heading, and - lists. Save before closing the app.',
                             style: theme.textTheme.bodySmall,
                           ),
-                          if (error != null)
-                            Padding(
-                              padding: const EdgeInsets.only(top: 16),
-                              child: Text(
-                                error!,
-                                style: TextStyle(
-                                  color: theme.colorScheme.error,
-                                ),
-                              ),
-                            ),
                         ],
                       ),
                     ),

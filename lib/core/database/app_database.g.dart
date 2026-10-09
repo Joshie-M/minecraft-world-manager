@@ -1987,6 +1987,458 @@ class ProjectsCompanion extends UpdateCompanion<Project> {
   }
 }
 
+class $JournalLocationTagsTable extends JournalLocationTags
+    with TableInfo<$JournalLocationTagsTable, JournalLocationTag> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $JournalLocationTagsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _entryIdMeta = const VerificationMeta(
+    'entryId',
+  );
+  @override
+  late final GeneratedColumn<String> entryId = GeneratedColumn<String>(
+    'entry_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES journal_entries (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _locationIdMeta = const VerificationMeta(
+    'locationId',
+  );
+  @override
+  late final GeneratedColumn<String> locationId = GeneratedColumn<String>(
+    'location_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES locations (id) ON DELETE CASCADE',
+    ),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [entryId, locationId];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'journal_location_tags';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<JournalLocationTag> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('entry_id')) {
+      context.handle(
+        _entryIdMeta,
+        entryId.isAcceptableOrUnknown(data['entry_id']!, _entryIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_entryIdMeta);
+    }
+    if (data.containsKey('location_id')) {
+      context.handle(
+        _locationIdMeta,
+        locationId.isAcceptableOrUnknown(data['location_id']!, _locationIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_locationIdMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {entryId, locationId};
+  @override
+  JournalLocationTag map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return JournalLocationTag(
+      entryId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}entry_id'],
+      )!,
+      locationId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}location_id'],
+      )!,
+    );
+  }
+
+  @override
+  $JournalLocationTagsTable createAlias(String alias) {
+    return $JournalLocationTagsTable(attachedDatabase, alias);
+  }
+}
+
+class JournalLocationTag extends DataClass
+    implements Insertable<JournalLocationTag> {
+  final String entryId;
+  final String locationId;
+  const JournalLocationTag({required this.entryId, required this.locationId});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['entry_id'] = Variable<String>(entryId);
+    map['location_id'] = Variable<String>(locationId);
+    return map;
+  }
+
+  JournalLocationTagsCompanion toCompanion(bool nullToAbsent) {
+    return JournalLocationTagsCompanion(
+      entryId: Value(entryId),
+      locationId: Value(locationId),
+    );
+  }
+
+  factory JournalLocationTag.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return JournalLocationTag(
+      entryId: serializer.fromJson<String>(json['entryId']),
+      locationId: serializer.fromJson<String>(json['locationId']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'entryId': serializer.toJson<String>(entryId),
+      'locationId': serializer.toJson<String>(locationId),
+    };
+  }
+
+  JournalLocationTag copyWith({String? entryId, String? locationId}) =>
+      JournalLocationTag(
+        entryId: entryId ?? this.entryId,
+        locationId: locationId ?? this.locationId,
+      );
+  JournalLocationTag copyWithCompanion(JournalLocationTagsCompanion data) {
+    return JournalLocationTag(
+      entryId: data.entryId.present ? data.entryId.value : this.entryId,
+      locationId: data.locationId.present
+          ? data.locationId.value
+          : this.locationId,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('JournalLocationTag(')
+          ..write('entryId: $entryId, ')
+          ..write('locationId: $locationId')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(entryId, locationId);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is JournalLocationTag &&
+          other.entryId == this.entryId &&
+          other.locationId == this.locationId);
+}
+
+class JournalLocationTagsCompanion extends UpdateCompanion<JournalLocationTag> {
+  final Value<String> entryId;
+  final Value<String> locationId;
+  final Value<int> rowid;
+  const JournalLocationTagsCompanion({
+    this.entryId = const Value.absent(),
+    this.locationId = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  JournalLocationTagsCompanion.insert({
+    required String entryId,
+    required String locationId,
+    this.rowid = const Value.absent(),
+  }) : entryId = Value(entryId),
+       locationId = Value(locationId);
+  static Insertable<JournalLocationTag> custom({
+    Expression<String>? entryId,
+    Expression<String>? locationId,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (entryId != null) 'entry_id': entryId,
+      if (locationId != null) 'location_id': locationId,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  JournalLocationTagsCompanion copyWith({
+    Value<String>? entryId,
+    Value<String>? locationId,
+    Value<int>? rowid,
+  }) {
+    return JournalLocationTagsCompanion(
+      entryId: entryId ?? this.entryId,
+      locationId: locationId ?? this.locationId,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (entryId.present) {
+      map['entry_id'] = Variable<String>(entryId.value);
+    }
+    if (locationId.present) {
+      map['location_id'] = Variable<String>(locationId.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('JournalLocationTagsCompanion(')
+          ..write('entryId: $entryId, ')
+          ..write('locationId: $locationId, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $JournalProjectTagsTable extends JournalProjectTags
+    with TableInfo<$JournalProjectTagsTable, JournalProjectTag> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $JournalProjectTagsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _entryIdMeta = const VerificationMeta(
+    'entryId',
+  );
+  @override
+  late final GeneratedColumn<String> entryId = GeneratedColumn<String>(
+    'entry_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES journal_entries (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _projectIdMeta = const VerificationMeta(
+    'projectId',
+  );
+  @override
+  late final GeneratedColumn<String> projectId = GeneratedColumn<String>(
+    'project_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES projects (id) ON DELETE CASCADE',
+    ),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [entryId, projectId];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'journal_project_tags';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<JournalProjectTag> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('entry_id')) {
+      context.handle(
+        _entryIdMeta,
+        entryId.isAcceptableOrUnknown(data['entry_id']!, _entryIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_entryIdMeta);
+    }
+    if (data.containsKey('project_id')) {
+      context.handle(
+        _projectIdMeta,
+        projectId.isAcceptableOrUnknown(data['project_id']!, _projectIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_projectIdMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {entryId, projectId};
+  @override
+  JournalProjectTag map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return JournalProjectTag(
+      entryId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}entry_id'],
+      )!,
+      projectId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}project_id'],
+      )!,
+    );
+  }
+
+  @override
+  $JournalProjectTagsTable createAlias(String alias) {
+    return $JournalProjectTagsTable(attachedDatabase, alias);
+  }
+}
+
+class JournalProjectTag extends DataClass
+    implements Insertable<JournalProjectTag> {
+  final String entryId;
+  final String projectId;
+  const JournalProjectTag({required this.entryId, required this.projectId});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['entry_id'] = Variable<String>(entryId);
+    map['project_id'] = Variable<String>(projectId);
+    return map;
+  }
+
+  JournalProjectTagsCompanion toCompanion(bool nullToAbsent) {
+    return JournalProjectTagsCompanion(
+      entryId: Value(entryId),
+      projectId: Value(projectId),
+    );
+  }
+
+  factory JournalProjectTag.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return JournalProjectTag(
+      entryId: serializer.fromJson<String>(json['entryId']),
+      projectId: serializer.fromJson<String>(json['projectId']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'entryId': serializer.toJson<String>(entryId),
+      'projectId': serializer.toJson<String>(projectId),
+    };
+  }
+
+  JournalProjectTag copyWith({String? entryId, String? projectId}) =>
+      JournalProjectTag(
+        entryId: entryId ?? this.entryId,
+        projectId: projectId ?? this.projectId,
+      );
+  JournalProjectTag copyWithCompanion(JournalProjectTagsCompanion data) {
+    return JournalProjectTag(
+      entryId: data.entryId.present ? data.entryId.value : this.entryId,
+      projectId: data.projectId.present ? data.projectId.value : this.projectId,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('JournalProjectTag(')
+          ..write('entryId: $entryId, ')
+          ..write('projectId: $projectId')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(entryId, projectId);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is JournalProjectTag &&
+          other.entryId == this.entryId &&
+          other.projectId == this.projectId);
+}
+
+class JournalProjectTagsCompanion extends UpdateCompanion<JournalProjectTag> {
+  final Value<String> entryId;
+  final Value<String> projectId;
+  final Value<int> rowid;
+  const JournalProjectTagsCompanion({
+    this.entryId = const Value.absent(),
+    this.projectId = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  JournalProjectTagsCompanion.insert({
+    required String entryId,
+    required String projectId,
+    this.rowid = const Value.absent(),
+  }) : entryId = Value(entryId),
+       projectId = Value(projectId);
+  static Insertable<JournalProjectTag> custom({
+    Expression<String>? entryId,
+    Expression<String>? projectId,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (entryId != null) 'entry_id': entryId,
+      if (projectId != null) 'project_id': projectId,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  JournalProjectTagsCompanion copyWith({
+    Value<String>? entryId,
+    Value<String>? projectId,
+    Value<int>? rowid,
+  }) {
+    return JournalProjectTagsCompanion(
+      entryId: entryId ?? this.entryId,
+      projectId: projectId ?? this.projectId,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (entryId.present) {
+      map['entry_id'] = Variable<String>(entryId.value);
+    }
+    if (projectId.present) {
+      map['project_id'] = Variable<String>(projectId.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('JournalProjectTagsCompanion(')
+          ..write('entryId: $entryId, ')
+          ..write('projectId: $projectId, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -1994,6 +2446,10 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $JournalEntriesTable journalEntries = $JournalEntriesTable(this);
   late final $LocationsTable locations = $LocationsTable(this);
   late final $ProjectsTable projects = $ProjectsTable(this);
+  late final $JournalLocationTagsTable journalLocationTags =
+      $JournalLocationTagsTable(this);
+  late final $JournalProjectTagsTable journalProjectTags =
+      $JournalProjectTagsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -2003,6 +2459,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     journalEntries,
     locations,
     projects,
+    journalLocationTags,
+    journalProjectTags,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -2033,6 +2491,34 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         limitUpdateKind: UpdateKind.delete,
       ),
       result: [TableUpdate('projects', kind: UpdateKind.update)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'journal_entries',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('journal_location_tags', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'locations',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('journal_location_tags', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'journal_entries',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('journal_project_tags', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'projects',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('journal_project_tags', kind: UpdateKind.delete)],
     ),
   ]);
 }
@@ -2600,6 +3086,51 @@ final class $$JournalEntriesTableReferences
       manager.$state.copyWith(prefetchedData: [item]),
     );
   }
+
+  static MultiTypedResultKey<
+    $JournalLocationTagsTable,
+    List<JournalLocationTag>
+  >
+  _journalLocationTagsRefsTable(_$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.journalLocationTags,
+        aliasName: 'journal_entries__id__journal_location_tags__entry_id',
+      );
+
+  $$JournalLocationTagsTableProcessedTableManager get journalLocationTagsRefs {
+    final manager = $$JournalLocationTagsTableTableManager(
+      $_db,
+      $_db.journalLocationTags,
+    ).filter((f) => f.entryId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _journalLocationTagsRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$JournalProjectTagsTable, List<JournalProjectTag>>
+  _journalProjectTagsRefsTable(_$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.journalProjectTags,
+        aliasName: 'journal_entries__id__journal_project_tags__entry_id',
+      );
+
+  $$JournalProjectTagsTableProcessedTableManager get journalProjectTagsRefs {
+    final manager = $$JournalProjectTagsTableTableManager(
+      $_db,
+      $_db.journalProjectTags,
+    ).filter((f) => f.entryId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _journalProjectTagsRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
 }
 
 class $$JournalEntriesTableFilterComposer
@@ -2662,6 +3193,56 @@ class $$JournalEntriesTableFilterComposer
           ),
     );
     return composer;
+  }
+
+  Expression<bool> journalLocationTagsRefs(
+    Expression<bool> Function($$JournalLocationTagsTableFilterComposer f) f,
+  ) {
+    final $$JournalLocationTagsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.journalLocationTags,
+      getReferencedColumn: (t) => t.entryId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$JournalLocationTagsTableFilterComposer(
+            $db: $db,
+            $table: $db.journalLocationTags,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> journalProjectTagsRefs(
+    Expression<bool> Function($$JournalProjectTagsTableFilterComposer f) f,
+  ) {
+    final $$JournalProjectTagsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.journalProjectTags,
+      getReferencedColumn: (t) => t.entryId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$JournalProjectTagsTableFilterComposer(
+            $db: $db,
+            $table: $db.journalProjectTags,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
   }
 }
 
@@ -2779,6 +3360,58 @@ class $$JournalEntriesTableAnnotationComposer
     );
     return composer;
   }
+
+  Expression<T> journalLocationTagsRefs<T extends Object>(
+    Expression<T> Function($$JournalLocationTagsTableAnnotationComposer a) f,
+  ) {
+    final $$JournalLocationTagsTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.journalLocationTags,
+          getReferencedColumn: (t) => t.entryId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$JournalLocationTagsTableAnnotationComposer(
+                $db: $db,
+                $table: $db.journalLocationTags,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+
+  Expression<T> journalProjectTagsRefs<T extends Object>(
+    Expression<T> Function($$JournalProjectTagsTableAnnotationComposer a) f,
+  ) {
+    final $$JournalProjectTagsTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.journalProjectTags,
+          getReferencedColumn: (t) => t.entryId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$JournalProjectTagsTableAnnotationComposer(
+                $db: $db,
+                $table: $db.journalProjectTags,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
 }
 
 class $$JournalEntriesTableTableManager
@@ -2794,7 +3427,11 @@ class $$JournalEntriesTableTableManager
           $$JournalEntriesTableUpdateCompanionBuilder,
           (JournalEntry, $$JournalEntriesTableReferences),
           JournalEntry,
-          PrefetchHooks Function({bool worldId})
+          PrefetchHooks Function({
+            bool worldId,
+            bool journalLocationTagsRefs,
+            bool journalProjectTagsRefs,
+          })
         > {
   $$JournalEntriesTableTableManager(
     _$AppDatabase db,
@@ -2857,48 +3494,100 @@ class $$JournalEntriesTableTableManager
                 ),
               )
               .toList(),
-          prefetchHooksCallback: ({worldId = false}) {
-            return PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [],
-              addJoins:
-                  <
-                    T extends TableManagerState<
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic
-                    >
-                  >(state) {
-                    if (worldId) {
-                      state =
-                          state.withJoin(
-                                currentTable: table,
-                                currentColumn: table.worldId,
-                                referencedTable: $$JournalEntriesTableReferences
-                                    ._worldIdTable(db),
-                                referencedColumn:
-                                    $$JournalEntriesTableReferences
-                                        ._worldIdTable(db)
-                                        .id,
-                              )
-                              as T;
-                    }
+          prefetchHooksCallback:
+              ({
+                worldId = false,
+                journalLocationTagsRefs = false,
+                journalProjectTagsRefs = false,
+              }) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (journalLocationTagsRefs) db.journalLocationTags,
+                    if (journalProjectTagsRefs) db.journalProjectTags,
+                  ],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (worldId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.worldId,
+                                    referencedTable:
+                                        $$JournalEntriesTableReferences
+                                            ._worldIdTable(db),
+                                    referencedColumn:
+                                        $$JournalEntriesTableReferences
+                                            ._worldIdTable(db)
+                                            .id,
+                                  )
+                                  as T;
+                        }
 
-                    return state;
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (journalLocationTagsRefs)
+                        await $_getPrefetchedData<
+                          JournalEntry,
+                          $JournalEntriesTable,
+                          JournalLocationTag
+                        >(
+                          currentTable: table,
+                          referencedTable: $$JournalEntriesTableReferences
+                              ._journalLocationTagsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$JournalEntriesTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).journalLocationTagsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.entryId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (journalProjectTagsRefs)
+                        await $_getPrefetchedData<
+                          JournalEntry,
+                          $JournalEntriesTable,
+                          JournalProjectTag
+                        >(
+                          currentTable: table,
+                          referencedTable: $$JournalEntriesTableReferences
+                              ._journalProjectTagsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$JournalEntriesTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).journalProjectTagsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.entryId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
                   },
-              getPrefetchedDataCallback: (items) async {
-                return [];
+                );
               },
-            );
-          },
         ),
       );
 }
@@ -2915,7 +3604,11 @@ typedef $$JournalEntriesTableProcessedTableManager =
       $$JournalEntriesTableUpdateCompanionBuilder,
       (JournalEntry, $$JournalEntriesTableReferences),
       JournalEntry,
-      PrefetchHooks Function({bool worldId})
+      PrefetchHooks Function({
+        bool worldId,
+        bool journalLocationTagsRefs,
+        bool journalProjectTagsRefs,
+      })
     >;
 typedef $$LocationsTableCreateCompanionBuilder =
     LocationsCompanion Function({
@@ -2981,6 +3674,30 @@ final class $$LocationsTableReferences
     ).filter((f) => f.locationId.id.sqlEquals($_itemColumn<String>('id')!));
 
     final cache = $_typedResult.readTableOrNull(_projectsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<
+    $JournalLocationTagsTable,
+    List<JournalLocationTag>
+  >
+  _journalLocationTagsRefsTable(_$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.journalLocationTags,
+        aliasName: 'locations__id__journal_location_tags__location_id',
+      );
+
+  $$JournalLocationTagsTableProcessedTableManager get journalLocationTagsRefs {
+    final manager = $$JournalLocationTagsTableTableManager(
+      $_db,
+      $_db.journalLocationTags,
+    ).filter((f) => f.locationId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _journalLocationTagsRefsTable($_db),
+    );
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: cache),
     );
@@ -3080,6 +3797,31 @@ class $$LocationsTableFilterComposer
           }) => $$ProjectsTableFilterComposer(
             $db: $db,
             $table: $db.projects,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> journalLocationTagsRefs(
+    Expression<bool> Function($$JournalLocationTagsTableFilterComposer f) f,
+  ) {
+    final $$JournalLocationTagsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.journalLocationTags,
+      getReferencedColumn: (t) => t.locationId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$JournalLocationTagsTableFilterComposer(
+            $db: $db,
+            $table: $db.journalLocationTags,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -3251,6 +3993,32 @@ class $$LocationsTableAnnotationComposer
     );
     return f(composer);
   }
+
+  Expression<T> journalLocationTagsRefs<T extends Object>(
+    Expression<T> Function($$JournalLocationTagsTableAnnotationComposer a) f,
+  ) {
+    final $$JournalLocationTagsTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.journalLocationTags,
+          getReferencedColumn: (t) => t.locationId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$JournalLocationTagsTableAnnotationComposer(
+                $db: $db,
+                $table: $db.journalLocationTags,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
 }
 
 class $$LocationsTableTableManager
@@ -3266,7 +4034,11 @@ class $$LocationsTableTableManager
           $$LocationsTableUpdateCompanionBuilder,
           (Location, $$LocationsTableReferences),
           Location,
-          PrefetchHooks Function({bool worldId, bool projectsRefs})
+          PrefetchHooks Function({
+            bool worldId,
+            bool projectsRefs,
+            bool journalLocationTagsRefs,
+          })
         > {
   $$LocationsTableTableManager(_$AppDatabase db, $LocationsTable table)
     : super(
@@ -3339,67 +4111,98 @@ class $$LocationsTableTableManager
                 ),
               )
               .toList(),
-          prefetchHooksCallback: ({worldId = false, projectsRefs = false}) {
-            return PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [if (projectsRefs) db.projects],
-              addJoins:
-                  <
-                    T extends TableManagerState<
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic
-                    >
-                  >(state) {
-                    if (worldId) {
-                      state =
-                          state.withJoin(
-                                currentTable: table,
-                                currentColumn: table.worldId,
-                                referencedTable: $$LocationsTableReferences
-                                    ._worldIdTable(db),
-                                referencedColumn: $$LocationsTableReferences
-                                    ._worldIdTable(db)
-                                    .id,
-                              )
-                              as T;
-                    }
+          prefetchHooksCallback:
+              ({
+                worldId = false,
+                projectsRefs = false,
+                journalLocationTagsRefs = false,
+              }) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (projectsRefs) db.projects,
+                    if (journalLocationTagsRefs) db.journalLocationTags,
+                  ],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (worldId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.worldId,
+                                    referencedTable: $$LocationsTableReferences
+                                        ._worldIdTable(db),
+                                    referencedColumn: $$LocationsTableReferences
+                                        ._worldIdTable(db)
+                                        .id,
+                                  )
+                                  as T;
+                        }
 
-                    return state;
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (projectsRefs)
+                        await $_getPrefetchedData<
+                          Location,
+                          $LocationsTable,
+                          Project
+                        >(
+                          currentTable: table,
+                          referencedTable: $$LocationsTableReferences
+                              ._projectsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$LocationsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).projectsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.locationId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (journalLocationTagsRefs)
+                        await $_getPrefetchedData<
+                          Location,
+                          $LocationsTable,
+                          JournalLocationTag
+                        >(
+                          currentTable: table,
+                          referencedTable: $$LocationsTableReferences
+                              ._journalLocationTagsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$LocationsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).journalLocationTagsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.locationId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
                   },
-              getPrefetchedDataCallback: (items) async {
-                return [
-                  if (projectsRefs)
-                    await $_getPrefetchedData<
-                      Location,
-                      $LocationsTable,
-                      Project
-                    >(
-                      currentTable: table,
-                      referencedTable: $$LocationsTableReferences
-                          ._projectsRefsTable(db),
-                      managerFromTypedResult: (p0) =>
-                          $$LocationsTableReferences(
-                            db,
-                            table,
-                            p0,
-                          ).projectsRefs,
-                      referencedItemsForCurrentItem: (item, referencedItems) =>
-                          referencedItems.where((e) => e.locationId == item.id),
-                      typedResults: items,
-                    ),
-                ];
+                );
               },
-            );
-          },
         ),
       );
 }
@@ -3416,7 +4219,11 @@ typedef $$LocationsTableProcessedTableManager =
       $$LocationsTableUpdateCompanionBuilder,
       (Location, $$LocationsTableReferences),
       Location,
-      PrefetchHooks Function({bool worldId, bool projectsRefs})
+      PrefetchHooks Function({
+        bool worldId,
+        bool projectsRefs,
+        bool journalLocationTagsRefs,
+      })
     >;
 typedef $$ProjectsTableCreateCompanionBuilder =
     ProjectsCompanion Function({
@@ -3478,6 +4285,27 @@ final class $$ProjectsTableReferences
     if (item == null) return manager;
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static MultiTypedResultKey<$JournalProjectTagsTable, List<JournalProjectTag>>
+  _journalProjectTagsRefsTable(_$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.journalProjectTags,
+        aliasName: 'projects__id__journal_project_tags__project_id',
+      );
+
+  $$JournalProjectTagsTableProcessedTableManager get journalProjectTagsRefs {
+    final manager = $$JournalProjectTagsTableTableManager(
+      $_db,
+      $_db.journalProjectTags,
+    ).filter((f) => f.projectId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _journalProjectTagsRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
     );
   }
 }
@@ -3565,6 +4393,31 @@ class $$ProjectsTableFilterComposer
           ),
     );
     return composer;
+  }
+
+  Expression<bool> journalProjectTagsRefs(
+    Expression<bool> Function($$JournalProjectTagsTableFilterComposer f) f,
+  ) {
+    final $$JournalProjectTagsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.journalProjectTags,
+      getReferencedColumn: (t) => t.projectId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$JournalProjectTagsTableFilterComposer(
+            $db: $db,
+            $table: $db.journalProjectTags,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
   }
 }
 
@@ -3726,6 +4579,32 @@ class $$ProjectsTableAnnotationComposer
     );
     return composer;
   }
+
+  Expression<T> journalProjectTagsRefs<T extends Object>(
+    Expression<T> Function($$JournalProjectTagsTableAnnotationComposer a) f,
+  ) {
+    final $$JournalProjectTagsTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.journalProjectTags,
+          getReferencedColumn: (t) => t.projectId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$JournalProjectTagsTableAnnotationComposer(
+                $db: $db,
+                $table: $db.journalProjectTags,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
 }
 
 class $$ProjectsTableTableManager
@@ -3741,7 +4620,11 @@ class $$ProjectsTableTableManager
           $$ProjectsTableUpdateCompanionBuilder,
           (Project, $$ProjectsTableReferences),
           Project,
-          PrefetchHooks Function({bool worldId, bool locationId})
+          PrefetchHooks Function({
+            bool worldId,
+            bool locationId,
+            bool journalProjectTagsRefs,
+          })
         > {
   $$ProjectsTableTableManager(_$AppDatabase db, $ProjectsTable table)
     : super(
@@ -3806,7 +4689,406 @@ class $$ProjectsTableTableManager
                 ),
               )
               .toList(),
-          prefetchHooksCallback: ({worldId = false, locationId = false}) {
+          prefetchHooksCallback:
+              ({
+                worldId = false,
+                locationId = false,
+                journalProjectTagsRefs = false,
+              }) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (journalProjectTagsRefs) db.journalProjectTags,
+                  ],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (worldId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.worldId,
+                                    referencedTable: $$ProjectsTableReferences
+                                        ._worldIdTable(db),
+                                    referencedColumn: $$ProjectsTableReferences
+                                        ._worldIdTable(db)
+                                        .id,
+                                  )
+                                  as T;
+                        }
+                        if (locationId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.locationId,
+                                    referencedTable: $$ProjectsTableReferences
+                                        ._locationIdTable(db),
+                                    referencedColumn: $$ProjectsTableReferences
+                                        ._locationIdTable(db)
+                                        .id,
+                                  )
+                                  as T;
+                        }
+
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (journalProjectTagsRefs)
+                        await $_getPrefetchedData<
+                          Project,
+                          $ProjectsTable,
+                          JournalProjectTag
+                        >(
+                          currentTable: table,
+                          referencedTable: $$ProjectsTableReferences
+                              ._journalProjectTagsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$ProjectsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).journalProjectTagsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.projectId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
+                  },
+                );
+              },
+        ),
+      );
+}
+
+typedef $$ProjectsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ProjectsTable,
+      Project,
+      $$ProjectsTableFilterComposer,
+      $$ProjectsTableOrderingComposer,
+      $$ProjectsTableAnnotationComposer,
+      $$ProjectsTableCreateCompanionBuilder,
+      $$ProjectsTableUpdateCompanionBuilder,
+      (Project, $$ProjectsTableReferences),
+      Project,
+      PrefetchHooks Function({
+        bool worldId,
+        bool locationId,
+        bool journalProjectTagsRefs,
+      })
+    >;
+typedef $$JournalLocationTagsTableCreateCompanionBuilder =
+    JournalLocationTagsCompanion Function({
+      required String entryId,
+      required String locationId,
+      Value<int> rowid,
+    });
+typedef $$JournalLocationTagsTableUpdateCompanionBuilder =
+    JournalLocationTagsCompanion Function({
+      Value<String> entryId,
+      Value<String> locationId,
+      Value<int> rowid,
+    });
+
+final class $$JournalLocationTagsTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $JournalLocationTagsTable,
+          JournalLocationTag
+        > {
+  $$JournalLocationTagsTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $JournalEntriesTable _entryIdTable(_$AppDatabase db) => db
+      .journalEntries
+      .createAlias('journal_location_tags__entry_id__journal_entries__id');
+
+  $$JournalEntriesTableProcessedTableManager get entryId {
+    final $_column = $_itemColumn<String>('entry_id')!;
+
+    final manager = $$JournalEntriesTableTableManager(
+      $_db,
+      $_db.journalEntries,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_entryIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $LocationsTable _locationIdTable(_$AppDatabase db) => db.locations
+      .createAlias('journal_location_tags__location_id__locations__id');
+
+  $$LocationsTableProcessedTableManager get locationId {
+    final $_column = $_itemColumn<String>('location_id')!;
+
+    final manager = $$LocationsTableTableManager(
+      $_db,
+      $_db.locations,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_locationIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$JournalLocationTagsTableFilterComposer
+    extends Composer<_$AppDatabase, $JournalLocationTagsTable> {
+  $$JournalLocationTagsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  $$JournalEntriesTableFilterComposer get entryId {
+    final $$JournalEntriesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.entryId,
+      referencedTable: $db.journalEntries,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$JournalEntriesTableFilterComposer(
+            $db: $db,
+            $table: $db.journalEntries,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$LocationsTableFilterComposer get locationId {
+    final $$LocationsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.locationId,
+      referencedTable: $db.locations,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$LocationsTableFilterComposer(
+            $db: $db,
+            $table: $db.locations,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$JournalLocationTagsTableOrderingComposer
+    extends Composer<_$AppDatabase, $JournalLocationTagsTable> {
+  $$JournalLocationTagsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  $$JournalEntriesTableOrderingComposer get entryId {
+    final $$JournalEntriesTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.entryId,
+      referencedTable: $db.journalEntries,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$JournalEntriesTableOrderingComposer(
+            $db: $db,
+            $table: $db.journalEntries,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$LocationsTableOrderingComposer get locationId {
+    final $$LocationsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.locationId,
+      referencedTable: $db.locations,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$LocationsTableOrderingComposer(
+            $db: $db,
+            $table: $db.locations,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$JournalLocationTagsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $JournalLocationTagsTable> {
+  $$JournalLocationTagsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  $$JournalEntriesTableAnnotationComposer get entryId {
+    final $$JournalEntriesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.entryId,
+      referencedTable: $db.journalEntries,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$JournalEntriesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.journalEntries,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$LocationsTableAnnotationComposer get locationId {
+    final $$LocationsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.locationId,
+      referencedTable: $db.locations,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$LocationsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.locations,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$JournalLocationTagsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $JournalLocationTagsTable,
+          JournalLocationTag,
+          $$JournalLocationTagsTableFilterComposer,
+          $$JournalLocationTagsTableOrderingComposer,
+          $$JournalLocationTagsTableAnnotationComposer,
+          $$JournalLocationTagsTableCreateCompanionBuilder,
+          $$JournalLocationTagsTableUpdateCompanionBuilder,
+          (JournalLocationTag, $$JournalLocationTagsTableReferences),
+          JournalLocationTag,
+          PrefetchHooks Function({bool entryId, bool locationId})
+        > {
+  $$JournalLocationTagsTableTableManager(
+    _$AppDatabase db,
+    $JournalLocationTagsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$JournalLocationTagsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$JournalLocationTagsTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$JournalLocationTagsTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> entryId = const Value.absent(),
+                Value<String> locationId = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => JournalLocationTagsCompanion(
+                entryId: entryId,
+                locationId: locationId,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String entryId,
+                required String locationId,
+                Value<int> rowid = const Value.absent(),
+              }) => JournalLocationTagsCompanion.insert(
+                entryId: entryId,
+                locationId: locationId,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$JournalLocationTagsTable, JournalLocationTag>(
+                    table,
+                  ),
+                  $$JournalLocationTagsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({entryId = false, locationId = false}) {
             return PrefetchHooks(
               db: db,
               explicitlyWatchedTables: [],
@@ -3826,16 +5108,18 @@ class $$ProjectsTableTableManager
                       dynamic
                     >
                   >(state) {
-                    if (worldId) {
+                    if (entryId) {
                       state =
                           state.withJoin(
                                 currentTable: table,
-                                currentColumn: table.worldId,
-                                referencedTable: $$ProjectsTableReferences
-                                    ._worldIdTable(db),
-                                referencedColumn: $$ProjectsTableReferences
-                                    ._worldIdTable(db)
-                                    .id,
+                                currentColumn: table.entryId,
+                                referencedTable:
+                                    $$JournalLocationTagsTableReferences
+                                        ._entryIdTable(db),
+                                referencedColumn:
+                                    $$JournalLocationTagsTableReferences
+                                        ._entryIdTable(db)
+                                        .id,
                               )
                               as T;
                     }
@@ -3844,11 +5128,13 @@ class $$ProjectsTableTableManager
                           state.withJoin(
                                 currentTable: table,
                                 currentColumn: table.locationId,
-                                referencedTable: $$ProjectsTableReferences
-                                    ._locationIdTable(db),
-                                referencedColumn: $$ProjectsTableReferences
-                                    ._locationIdTable(db)
-                                    .id,
+                                referencedTable:
+                                    $$JournalLocationTagsTableReferences
+                                        ._locationIdTable(db),
+                                referencedColumn:
+                                    $$JournalLocationTagsTableReferences
+                                        ._locationIdTable(db)
+                                        .id,
                               )
                               as T;
                     }
@@ -3864,19 +5150,386 @@ class $$ProjectsTableTableManager
       );
 }
 
-typedef $$ProjectsTableProcessedTableManager =
+typedef $$JournalLocationTagsTableProcessedTableManager =
     ProcessedTableManager<
       _$AppDatabase,
-      $ProjectsTable,
-      Project,
-      $$ProjectsTableFilterComposer,
-      $$ProjectsTableOrderingComposer,
-      $$ProjectsTableAnnotationComposer,
-      $$ProjectsTableCreateCompanionBuilder,
-      $$ProjectsTableUpdateCompanionBuilder,
-      (Project, $$ProjectsTableReferences),
-      Project,
-      PrefetchHooks Function({bool worldId, bool locationId})
+      $JournalLocationTagsTable,
+      JournalLocationTag,
+      $$JournalLocationTagsTableFilterComposer,
+      $$JournalLocationTagsTableOrderingComposer,
+      $$JournalLocationTagsTableAnnotationComposer,
+      $$JournalLocationTagsTableCreateCompanionBuilder,
+      $$JournalLocationTagsTableUpdateCompanionBuilder,
+      (JournalLocationTag, $$JournalLocationTagsTableReferences),
+      JournalLocationTag,
+      PrefetchHooks Function({bool entryId, bool locationId})
+    >;
+typedef $$JournalProjectTagsTableCreateCompanionBuilder =
+    JournalProjectTagsCompanion Function({
+      required String entryId,
+      required String projectId,
+      Value<int> rowid,
+    });
+typedef $$JournalProjectTagsTableUpdateCompanionBuilder =
+    JournalProjectTagsCompanion Function({
+      Value<String> entryId,
+      Value<String> projectId,
+      Value<int> rowid,
+    });
+
+final class $$JournalProjectTagsTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $JournalProjectTagsTable,
+          JournalProjectTag
+        > {
+  $$JournalProjectTagsTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $JournalEntriesTable _entryIdTable(_$AppDatabase db) => db
+      .journalEntries
+      .createAlias('journal_project_tags__entry_id__journal_entries__id');
+
+  $$JournalEntriesTableProcessedTableManager get entryId {
+    final $_column = $_itemColumn<String>('entry_id')!;
+
+    final manager = $$JournalEntriesTableTableManager(
+      $_db,
+      $_db.journalEntries,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_entryIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $ProjectsTable _projectIdTable(_$AppDatabase db) =>
+      db.projects.createAlias('journal_project_tags__project_id__projects__id');
+
+  $$ProjectsTableProcessedTableManager get projectId {
+    final $_column = $_itemColumn<String>('project_id')!;
+
+    final manager = $$ProjectsTableTableManager(
+      $_db,
+      $_db.projects,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_projectIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$JournalProjectTagsTableFilterComposer
+    extends Composer<_$AppDatabase, $JournalProjectTagsTable> {
+  $$JournalProjectTagsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  $$JournalEntriesTableFilterComposer get entryId {
+    final $$JournalEntriesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.entryId,
+      referencedTable: $db.journalEntries,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$JournalEntriesTableFilterComposer(
+            $db: $db,
+            $table: $db.journalEntries,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$ProjectsTableFilterComposer get projectId {
+    final $$ProjectsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.projectId,
+      referencedTable: $db.projects,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ProjectsTableFilterComposer(
+            $db: $db,
+            $table: $db.projects,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$JournalProjectTagsTableOrderingComposer
+    extends Composer<_$AppDatabase, $JournalProjectTagsTable> {
+  $$JournalProjectTagsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  $$JournalEntriesTableOrderingComposer get entryId {
+    final $$JournalEntriesTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.entryId,
+      referencedTable: $db.journalEntries,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$JournalEntriesTableOrderingComposer(
+            $db: $db,
+            $table: $db.journalEntries,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$ProjectsTableOrderingComposer get projectId {
+    final $$ProjectsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.projectId,
+      referencedTable: $db.projects,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ProjectsTableOrderingComposer(
+            $db: $db,
+            $table: $db.projects,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$JournalProjectTagsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $JournalProjectTagsTable> {
+  $$JournalProjectTagsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  $$JournalEntriesTableAnnotationComposer get entryId {
+    final $$JournalEntriesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.entryId,
+      referencedTable: $db.journalEntries,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$JournalEntriesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.journalEntries,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$ProjectsTableAnnotationComposer get projectId {
+    final $$ProjectsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.projectId,
+      referencedTable: $db.projects,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ProjectsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.projects,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$JournalProjectTagsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $JournalProjectTagsTable,
+          JournalProjectTag,
+          $$JournalProjectTagsTableFilterComposer,
+          $$JournalProjectTagsTableOrderingComposer,
+          $$JournalProjectTagsTableAnnotationComposer,
+          $$JournalProjectTagsTableCreateCompanionBuilder,
+          $$JournalProjectTagsTableUpdateCompanionBuilder,
+          (JournalProjectTag, $$JournalProjectTagsTableReferences),
+          JournalProjectTag,
+          PrefetchHooks Function({bool entryId, bool projectId})
+        > {
+  $$JournalProjectTagsTableTableManager(
+    _$AppDatabase db,
+    $JournalProjectTagsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$JournalProjectTagsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$JournalProjectTagsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$JournalProjectTagsTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> entryId = const Value.absent(),
+                Value<String> projectId = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => JournalProjectTagsCompanion(
+                entryId: entryId,
+                projectId: projectId,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String entryId,
+                required String projectId,
+                Value<int> rowid = const Value.absent(),
+              }) => JournalProjectTagsCompanion.insert(
+                entryId: entryId,
+                projectId: projectId,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$JournalProjectTagsTable, JournalProjectTag>(
+                    table,
+                  ),
+                  $$JournalProjectTagsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({entryId = false, projectId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (entryId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.entryId,
+                                referencedTable:
+                                    $$JournalProjectTagsTableReferences
+                                        ._entryIdTable(db),
+                                referencedColumn:
+                                    $$JournalProjectTagsTableReferences
+                                        ._entryIdTable(db)
+                                        .id,
+                              )
+                              as T;
+                    }
+                    if (projectId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.projectId,
+                                referencedTable:
+                                    $$JournalProjectTagsTableReferences
+                                        ._projectIdTable(db),
+                                referencedColumn:
+                                    $$JournalProjectTagsTableReferences
+                                        ._projectIdTable(db)
+                                        .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$JournalProjectTagsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $JournalProjectTagsTable,
+      JournalProjectTag,
+      $$JournalProjectTagsTableFilterComposer,
+      $$JournalProjectTagsTableOrderingComposer,
+      $$JournalProjectTagsTableAnnotationComposer,
+      $$JournalProjectTagsTableCreateCompanionBuilder,
+      $$JournalProjectTagsTableUpdateCompanionBuilder,
+      (JournalProjectTag, $$JournalProjectTagsTableReferences),
+      JournalProjectTag,
+      PrefetchHooks Function({bool entryId, bool projectId})
     >;
 
 class $AppDatabaseManager {
@@ -3890,4 +5543,8 @@ class $AppDatabaseManager {
       $$LocationsTableTableManager(_db, _db.locations);
   $$ProjectsTableTableManager get projects =>
       $$ProjectsTableTableManager(_db, _db.projects);
+  $$JournalLocationTagsTableTableManager get journalLocationTags =>
+      $$JournalLocationTagsTableTableManager(_db, _db.journalLocationTags);
+  $$JournalProjectTagsTableTableManager get journalProjectTags =>
+      $$JournalProjectTagsTableTableManager(_db, _db.journalProjectTags);
 }

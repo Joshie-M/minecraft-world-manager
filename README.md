@@ -7,15 +7,15 @@ notes, saved coordinates, world projects, search, and local SQLite persistence.
 
 - Linux release build succeeded.
 - Static analysis passed with no issues.
-- Twenty-two tests passed: disk CRUD/reopen, invalid data handling, world/journal UI CRUD, keyboard shortcuts,
-  world isolation, migrations, coordinate validation/clipboard copying, project/location relationships, and responsive light/dark layouts.
+- Twenty-six tests passed: disk CRUD/reopen, invalid data handling, world/journal UI CRUD, keyboard shortcuts,
+  world isolation, migrations, coordinate validation/clipboard copying, project/location relationships, journal tags/hover previews, and responsive light/dark layouts.
 - The compiled desktop app created a world through its UI. After stopping and
   restarting the process, the world appeared again on its dashboard. A journal
   entry was also saved through the compiled UI and displayed after restart.
 
 Android, iOS, macOS and Windows runners are generated but those platforms have
-not been built or tested in this cloud environment. The user confirmed worlds, journals and saved locations working on macOS.
-Projects still need local macOS verification. This is not the full MVP.
+not been built or tested in this cloud environment. The user confirmed worlds, journals, saved locations and projects working on macOS.
+Journal tags and location project lists still need local macOS verification. This is not the full MVP.
 
 ## Design preview
 
@@ -49,6 +49,7 @@ validation, start Xvfb and run the compiled application:
 source /workspace/cloud-setup/env.sh
 Xvfb :99 -screen 0 1280x900x24 -nolisten tcp &
 export DISPLAY=:99
+export GDK_BACKEND=x11
 export XDG_DATA_HOME=/workspace/smoke-data
 cd /workspace/minecraft-world-manager
 ./build/linux/x64/release/bundle/minecraft_world_manager
@@ -93,7 +94,7 @@ Schema version 2 adds journal entries automatically and preserves existing world
 Deleting a world now deletes its journal entries after confirmation. Editing an
 entry preserves its original creation timestamp. Leaving an editor with changes
 asks before discarding. Unsaved edits are not crash-recovery drafts: save before
-quitting the app. Images, tags, coordinates and linked records are future features;
+quitting the app. Image attachments and free-form labels are future features;
 Markdown images do not fetch remote files, and links are currently display-only.
 
 ## Saved locations
@@ -130,4 +131,26 @@ Deleting a linked location removes the link and keeps the project and notes.
 Deleting a world also deletes its projects after confirmation. Changes require
 explicit saving (Command+Enter / Control+Enter); leaving a changed editor asks
 before discarding. Save before quitting—crash-recovery drafts are not implemented.
-Task checklists, materials, images, tags and multiple location links are deferred.
+Task checklists, materials, images, free-form labels and multiple location links are deferred.
+
+## Journal tags & location projects
+
+[Journal hover card](docs/screenshots/journal-tags.png) · [Location project list](docs/screenshots/location-projects.png)
+
+Locations now show **Projects at this location**, including completed projects
+with their status. Click a project in this list to read it. The list follows
+project edits and location changes automatically.
+
+When creating or editing a journal entry, use **Tag locations & projects** to
+select any number of saved records from that world, then **Save entry**. Click a
+selected tag again to remove it. These are links to records, not arbitrary text
+labels or inline Markdown mentions. Saved entries show compact tags: hover on
+desktop for a mini card, or click/tap for full details. Previews include location
+coordinates/dimension/notes or project status/notes and its linked location.
+Hover previews are also available while choosing tags in the editor.
+
+Schema version 5 adds tag association tables without replacing existing records.
+Entry content and tag changes save together. Renaming or editing a tagged record
+updates its preview; deleting it removes its tags while preserving the journal
+text. If a record disappears during editing, remove its unavailable tag before
+saving. Tags participate in unsaved-change confirmation. No new package required.

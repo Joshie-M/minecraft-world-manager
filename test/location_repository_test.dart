@@ -73,7 +73,7 @@ void main() {
               .data
               .values
               .single,
-          4,
+          5,
         );
         await locations.delete(worldId: 'world', id: id);
         expect(await locations.watch('world').first, isEmpty);

@@ -66,13 +66,40 @@ class Projects extends Table {
   Set<Column> get primaryKey => {id};
 }
 
-@DriftDatabase(tables: [Worlds, JournalEntries, Locations, Projects])
+class JournalLocationTags extends Table {
+  TextColumn get entryId =>
+      text().references(JournalEntries, #id, onDelete: KeyAction.cascade)();
+  TextColumn get locationId =>
+      text().references(Locations, #id, onDelete: KeyAction.cascade)();
+  @override
+  Set<Column> get primaryKey => {entryId, locationId};
+}
+
+class JournalProjectTags extends Table {
+  TextColumn get entryId =>
+      text().references(JournalEntries, #id, onDelete: KeyAction.cascade)();
+  TextColumn get projectId =>
+      text().references(Projects, #id, onDelete: KeyAction.cascade)();
+  @override
+  Set<Column> get primaryKey => {entryId, projectId};
+}
+
+@DriftDatabase(
+  tables: [
+    Worlds,
+    JournalEntries,
+    Locations,
+    Projects,
+    JournalLocationTags,
+    JournalProjectTags,
+  ],
+)
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -81,6 +108,10 @@ class AppDatabase extends _$AppDatabase {
       if (from < 2) await m.createTable(journalEntries);
       if (from < 3) await m.createTable(locations);
       if (from < 4) await m.createTable(projects);
+      if (from < 5) {
+        await m.createTable(journalLocationTags);
+        await m.createTable(journalProjectTags);
+      }
     },
     beforeOpen: (_) async => customStatement('PRAGMA foreign_keys = ON'),
   );

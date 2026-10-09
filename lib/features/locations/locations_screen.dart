@@ -6,6 +6,8 @@ import '../../app/app_shell.dart';
 import '../../core/database/app_database.dart';
 import 'location_repository.dart';
 import 'location_editor.dart';
+import '../projects/project_repository.dart';
+import '../projects/projects_screen.dart';
 
 Future<void> copyCoordinates(BuildContext context, Location location) async {
   try {
@@ -29,46 +31,113 @@ Future<void> copyCoordinates(BuildContext context, Location location) async {
 Future<void> showLocationDetails(BuildContext context, Location location) =>
     showDialog<void>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(location.name),
-        content: SizedBox(
-          width: 440,
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(location.dimension),
-                const SizedBox(height: 16),
-                const Text('X / Y / Z'),
-                const SizedBox(height: 8),
-                SelectableText(
-                  coordinateText(location),
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleLarge?.copyWith(fontFamily: 'monospace'),
+      builder: (_) =>
+          LocationDetails(worldId: location.worldId, id: location.id),
+    );
+
+class LocationDetails extends ConsumerWidget {
+  const LocationDetails({super.key, required this.worldId, required this.id});
+  final String worldId, id;
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final locations = ref.watch(locationsProvider(worldId));
+    final matches =
+        locations.asData?.value.where((l) => l.id == id).toList() ??
+        <Location>[];
+    final location = matches.isEmpty ? null : matches.first;
+    return AlertDialog(
+      title: Text(location?.name ?? 'Location'),
+      content: SizedBox(
+        width: 440,
+        child: SingleChildScrollView(
+          child: location == null
+              ? Text(
+                  locations.isLoading
+                      ? 'Loading location…'
+                      : locations.hasError
+                      ? 'Could not load location.'
+                      : 'This location is no longer available.',
+                )
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(location.dimension),
+                    const SizedBox(height: 16),
+                    const Text('X / Y / Z'),
+                    const SizedBox(height: 8),
+                    SelectableText(
+                      coordinateText(location),
+                      style: Theme.of(
+                        context,
+                      ).textTheme.titleLarge?.copyWith(fontFamily: 'monospace'),
+                    ),
+                    if (location.notes.isNotEmpty) ...[
+                      const SizedBox(height: 20),
+                      SelectableText(location.notes),
+                    ],
+                    const SizedBox(height: 24),
+                    Text(
+                      'Projects at this location',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: 8),
+                    ref
+                        .watch(projectsProvider(worldId))
+                        .when(
+                          loading: () => const CupertinoActivityIndicator(),
+                          error: (_, _) => TextButton(
+                            onPressed: () =>
+                                ref.invalidate(projectsProvider(worldId)),
+                            child: const Text('Retry loading projects'),
+                          ),
+                          data: (projects) {
+                            final linked = projects
+                                .where((p) => p.locationId == id)
+                                .toList();
+                            return linked.isEmpty
+                                ? const Text('No projects linked yet.')
+                                : Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      for (final p in linked)
+                                        ListTile(
+                                          contentPadding: EdgeInsets.zero,
+                                          title: Text(p.name),
+                                          subtitle: Text(p.status),
+                                          trailing: const Icon(
+                                            CupertinoIcons.chevron_right,
+                                            size: 14,
+                                          ),
+                                          onTap: () => showProjectDetails(
+                                            context,
+                                            worldId: worldId,
+                                            id: p.id,
+                                          ),
+                                        ),
+                                    ],
+                                  );
+                          },
+                        ),
+                  ],
                 ),
-                if (location.notes.isNotEmpty) ...[
-                  const SizedBox(height: 20),
-                  SelectableText(location.notes),
-                ],
-              ],
-            ),
-          ),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Close'),
-          ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Close'),
+        ),
+        if (location != null)
           OutlinedButton.icon(
             onPressed: () => copyCoordinates(context, location),
             icon: const Icon(CupertinoIcons.doc_on_doc, size: 16),
             label: const Text('Copy coordinates'),
           ),
-        ],
-      ),
+      ],
     );
+  }
+}
 
 class LocationsScreen extends ConsumerStatefulWidget {
   const LocationsScreen({
