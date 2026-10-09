@@ -366,3 +366,28 @@ Four new tests cover migration from schema 6, disk reopen, gathered quantities,
 surplus handling, backup round trips and legacy parsing, invalid ownership/input,
 project/world cascade, and CRUD/error/discard UI at phone dark and desktop light
 widths. The full suite contains 60 tests; Mac verification follows the update.
+
+## Block suggestions and stack quantities
+
+A bundled JSON catalog provides offline block suggestions, avoiding a runtime
+network dependency. It is generated from pinned PrismarineJS/minecraft-data Java
+26.1 and Bedrock 1.26.30 block tables, deduplicating display names and retaining ID
+aliases. Java metadata takes precedence for common names. Source, revision, MIT
+license declaration, and regeneration instructions are retained with the asset.
+The combined snapshot has 1,326 names, including technical/edition-exclusive
+blocks. Version-specific filtering is deferred until worlds track game versions.
+
+RawAutocomplete reuses the material name controller, preserves custom input,
+supports tap and keyboard selection, and loads catalog options asynchronously.
+Matching is case-insensitive by all query words, including underscore-separated
+IDs, with name prefixes ranked first and at most 12 suggestions. The list and
+editor share integer quotient/remainder formatting for stack sizes 64, 16 and 1.
+Exact names or aliases identify catalog materials; custom names use a disclosed
+64-item assumption. Individual item totals remain the stored source of truth,
+without changing the database or backup format.
+
+Four new tests check real bundled asset loading, distinct names/stack metadata,
+matching, quantity arithmetic, and suggestion selection by tap and keyboard at
+phone dark and desktop light sizes, custom-name saves and reading-view breakdowns.
+Widget tests inject the actual preloaded asset to avoid asynchronous bundle I/O
+races in the test clock. The full suite contains 64 tests.

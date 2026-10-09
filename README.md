@@ -7,7 +7,7 @@ notes, saved coordinates, world projects, search, and local SQLite persistence.
 
 - Linux release build succeeded.
 - Static analysis passed with no issues.
-- Sixty tests passed: disk CRUD/reopen, invalid data handling, world/journal UI CRUD, keyboard shortcuts,
+- Sixty-four tests passed: disk CRUD/reopen, invalid data handling, world/journal UI CRUD, keyboard shortcuts,
   world isolation, migrations, coordinate validation/clipboard copying, project/location relationships, inline @mentions/autocomplete/hover previews, project checklists, and responsive light/dark layouts.
 - The compiled desktop app created a world through its UI. After stopping and
   restarting the process, the world appeared again on its dashboard. A journal
@@ -245,3 +245,18 @@ or checklist completion. The editor protects unsaved changes and retains input
 on save errors. Materials are included in new backups and restored with the
 corresponding project copies. Schema 7 adds the materials table while preserving
 existing records; deleting a project or world removes its materials as well.
+
+## Block autocomplete and stacks
+
+Material names suggest matching blocks as you type, using a bundled offline
+catalog of 1,326 distinct names from Java 26.1 and Bedrock 1.26.30. Match names or
+internal block IDs, select with the mouse/touch, or use arrow keys and Enter.
+Custom names remain supported. The catalog is a pinned snapshot and includes
+some edition-exclusive and technical blocks; it is not filtered by world version.
+
+The material list and editor preview show the total needed as stacks plus loose
+items: 136 ordinary blocks becomes **2 × stacks of 64 + 8 items**. Catalog stack
+sizes also handle signs (16) and beds (unstackable). Custom names use stacks of 64,
+as disclosed in the editor. Quantities and backups still store individual item
+counts, so existing records need no database migration. Catalog provenance and
+regeneration instructions are in `assets/catalog/README.md`.

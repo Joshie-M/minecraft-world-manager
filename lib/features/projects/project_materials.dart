@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../app/labeled_field.dart';
 import '../../core/database/app_database.dart';
 import 'material_repository.dart';
+import 'block_catalog.dart';
 
 class ProjectMaterialsSection extends ConsumerStatefulWidget {
   const ProjectMaterialsSection({
@@ -87,6 +88,13 @@ class _ProjectMaterialsSectionState
     }
   }
 
+  String stacks(ProjectMaterial material) {
+    final catalog = ref.watch(blockCatalogProvider);
+    if (catalog.isLoading) return '${material.needed} items needed';
+    final size = catalog.asData?.value.match(material.name)?.stackSize ?? 64;
+    return 'Needed: ${stackQuantity(material.needed, size)}';
+  }
+
   @override
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
@@ -135,8 +143,14 @@ class _ProjectMaterialsSectionState
                         ListTile(
                           contentPadding: EdgeInsets.zero,
                           title: Text(material.name),
-                          subtitle: Text(
-                            '${material.gathered} of ${material.needed} gathered',
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '${material.gathered} of ${material.needed} gathered',
+                              ),
+                              Text(stacks(material)),
+                            ],
                           ),
                           leading: Icon(
                             material.gathered >= material.needed
@@ -209,6 +223,7 @@ class MaterialEditor extends ConsumerStatefulWidget {
 
 class _MaterialEditorState extends ConsumerState<MaterialEditor> {
   final form = GlobalKey<FormState>();
+  final nameFocus = FocusNode();
   late final name = TextEditingController(text: widget.material?.name ?? '');
   late final needed = TextEditingController(
     text: '${widget.material?.needed ?? 1}',
@@ -233,6 +248,7 @@ class _MaterialEditorState extends ConsumerState<MaterialEditor> {
   void changed() => setState(() {});
   @override
   void dispose() {
+    nameFocus.dispose();
     name.dispose();
     needed.dispose();
     gathered.dispose();
@@ -322,17 +338,75 @@ class _MaterialEditorState extends ConsumerState<MaterialEditor> {
                 children: [
                   LabeledField(
                     label: 'Material',
-                    child: TextFormField(
-                      key: const ValueKey('material-name'),
-                      controller: name,
-                      autofocus: true,
-                      enabled: !saving,
-                      maxLength: 100,
-                      onFieldSubmitted: (_) => save(),
-                      validator: (value) =>
-                          value == null || value.trim().isEmpty
-                          ? 'Give this material a name.'
-                          : null,
+                    child: RawAutocomplete<MinecraftBlock>(
+                      textEditingController: name,
+                      focusNode: nameFocus,
+                      displayStringForOption: (block) => block.name,
+                      optionsBuilder: (value) async => saving
+                          ? <MinecraftBlock>[]
+                          : (await ref.read(
+                              blockCatalogProvider.future,
+                            )).search(value.text),
+                      fieldViewBuilder: (context, controller, focus, submit) =>
+                          TextFormField(
+                            key: const ValueKey('material-name'),
+                            controller: controller,
+                            focusNode: focus,
+                            autofocus: true,
+                            enabled: !saving,
+                            maxLength: 100,
+                            onFieldSubmitted: (_) => submit(),
+                            decoration: const InputDecoration(
+                              hintText: 'Start typing a block name',
+                            ),
+                            validator: (value) =>
+                                value == null || value.trim().isEmpty
+                                ? 'Give this material a name.'
+                                : null,
+                          ),
+                      optionsViewBuilder: (context, select, options) => Align(
+                        alignment: Alignment.topLeft,
+                        child: Material(
+                          elevation: 2,
+                          borderRadius: BorderRadius.circular(8),
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.surfaceContainerLow,
+                          child: SizedBox(
+                            width: (MediaQuery.sizeOf(context).width - 96)
+                                .clamp(0, 360),
+                            child: ConstrainedBox(
+                              constraints: const BoxConstraints(maxHeight: 200),
+                              child: ListView.builder(
+                                shrinkWrap: true,
+                                padding: EdgeInsets.zero,
+                                itemCount: options.length,
+                                itemBuilder: (context, index) {
+                                  final block = options.elementAt(index);
+                                  return Builder(
+                                    builder: (context) => ListTile(
+                                      key: ValueKey('block-option-${block.id}'),
+                                      dense: true,
+                                      selected:
+                                          AutocompleteHighlightedOption.of(
+                                            context,
+                                          ) ==
+                                          index,
+                                      title: Text(block.name),
+                                      subtitle: Text(
+                                        block.stackSize == 1
+                                            ? 'Unstackable'
+                                            : 'Stacks of ${block.stackSize}',
+                                      ),
+                                      onTap: () => select(block),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -359,8 +433,17 @@ class _MaterialEditorState extends ConsumerState<MaterialEditor> {
                     ),
                     const SizedBox(height: 12),
                   ],
+                  if (int.tryParse(needed.text.trim()) case final int count
+                      when count >= 0)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: Text(
+                        'Needed: ${stackQuantity(count, ref.watch(blockCatalogProvider).asData?.value.match(name.text)?.stackSize ?? 64)}',
+                        key: const ValueKey('material-stack-preview'),
+                      ),
+                    ),
                   const Text(
-                    'Quantities count individual items. You can record extra gathered items.',
+                    'Enter individual item counts. Custom material names use stacks of 64.',
                   ),
                   if (error != null)
                     Text(
