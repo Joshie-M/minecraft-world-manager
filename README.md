@@ -1,14 +1,14 @@
 # Minecraft World Manager
 
 An offline Flutter companion for Minecraft. The app supports world management and world-scoped journals with Markdown
-notes, chronological entries, search, and local SQLite persistence.
+notes, saved coordinates, search, and local SQLite persistence.
 
 ## Verified in this cloud environment
 
 - Linux release build succeeded.
 - Static analysis passed with no issues.
-- Thirteen tests passed: disk CRUD/reopen, invalid data handling, world/journal UI CRUD, keyboard shortcuts,
-  world isolation, migrations, and responsive light/dark layouts.
+- Eighteen tests passed: disk CRUD/reopen, invalid data handling, world/journal UI CRUD, keyboard shortcuts,
+  world isolation, migrations, coordinate validation/clipboard copying, and responsive light/dark layouts.
 - The compiled desktop app created a world through its UI. After stopping and
   restarting the process, the world appeared again on its dashboard. A journal
   entry was also saved through the compiled UI and displayed after restart.
@@ -95,3 +95,22 @@ entry preserves its original creation timestamp. Leaving an editor with changes
 asks before discarding. Unsaved edits are not crash-recovery drafts: save before
 quitting the app. Images, tags, coordinates and linked records are future features;
 Markdown images do not fetch remote files, and links are currently display-only.
+
+## Saved locations
+
+[Locations preview](docs/screenshots/locations.png)
+
+Open a world and choose **Open locations** in its Saved locations section. Create
+or edit a named place with signed whole-number X/Y/Z coordinates, a standard or
+custom dimension, and optional notes. Click a location to read its details; use
+its actions menu to edit or delete. The copy button copies `X Y Z` with spaces,
+without a teleport command or dimension conversion. Search covers names, notes,
+dimensions and coordinates. Locations are sorted by name and can be filtered by
+dimension. The world overview shows up to three saved locations with direct
+view/copy actions.
+
+Schema version 3 adds locations without replacing worlds or journals. Removing
+a world also removes its owned locations after confirmation. Coordinates accept
+32-bit signed decimal integers rather than imposing edition-specific world limits.
+Unsaved editor changes require confirmation before discarding. Tags, categories,
+favorites, images and an optional Nether travel helper can follow later.

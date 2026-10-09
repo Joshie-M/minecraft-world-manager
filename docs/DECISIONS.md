@@ -105,3 +105,25 @@ stream so saved edits appear immediately. World overviews show the three most
 recent entries with direct reading links; Open journal retains the full searchable
 timeline. No schema changes. Responsive journal flow tests now verify reading
 from both the timeline and overview, explicit editing and return navigation.
+
+## Saved locations milestone
+
+Schema version 3 adds Locations (UUID, world ID, name, X/Y/Z, dimension, notes,
+creation/update timestamps), with migration tests preserving existing world and
+journal data. Foreign keys cascade world deletion. Updates/deletes require both
+location and world IDs. Signed decimal coordinates are validated as 32-bit ints,
+including negative Y; no edition-dependent height bounds are imposed.
+
+Locations have explicit reading, editing, delete confirmation, dirty-editor
+confirmation, name sorting, literal case-insensitive search and dimension filters.
+Standard dimensions are Overworld/Nether/End; custom names are supported and
+filter labels distinguish custom names from the All dimensions option. Copying
+uses the platform clipboard and reports success/failure. World overviews expose
+a small location summary with direct read/copy actions. No new package dependency.
+
+Verified: all 18 tests passed across repositories and responsive screens; analysis
+found no issues and the Linux release build passed. The compiled UI upgraded the
+existing demo database, preserved worlds/journal data, saved a location and copied
+its exact coordinates through the real system clipboard. macOS location verification remains
+on the user's machine. Future work: images, then tags/categories/favorites and
+optional portal travel planning. No coordinate conversion is applied to copying.
