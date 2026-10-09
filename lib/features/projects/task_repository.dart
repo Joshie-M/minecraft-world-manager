@@ -111,6 +111,38 @@ class TaskRepository {
     }
     await touch(projectId);
   });
+  Future<void> move({
+    required String worldId,
+    required String projectId,
+    required String id,
+    required bool up,
+  }) => db.transaction(() async {
+    await checkOwner(worldId, projectId);
+    final tasks =
+        await (db.select(db.projectTasks)
+              ..where((t) => t.projectId.equals(projectId))
+              ..orderBy([
+                (t) => OrderingTerm.asc(t.position),
+                (t) => OrderingTerm.asc(t.id),
+              ]))
+            .get();
+    final index = tasks.indexWhere((t) => t.id == id);
+    if (index < 0) {
+      throw StateError('This task no longer exists in this project.');
+    }
+    final target = index + (up ? -1 : 1);
+    if (target < 0 || target >= tasks.length) return;
+    tasks.insert(target, tasks.removeAt(index));
+    for (var position = 0; position < tasks.length; position++) {
+      await (db.update(db.projectTasks)..where(
+            (t) =>
+                t.id.equals(tasks[position].id) & t.projectId.equals(projectId),
+          ))
+          .write(ProjectTasksCompanion(position: Value(position)));
+    }
+    await touch(projectId);
+  });
+
   Future<void> delete({
     required String worldId,
     required String projectId,

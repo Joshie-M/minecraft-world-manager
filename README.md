@@ -7,7 +7,7 @@ notes, saved coordinates, world projects, search, and local SQLite persistence.
 
 - Linux release build succeeded.
 - Static analysis passed with no issues.
-- Fifty tests passed: disk CRUD/reopen, invalid data handling, world/journal UI CRUD, keyboard shortcuts,
+- Fifty-three tests passed: disk CRUD/reopen, invalid data handling, world/journal UI CRUD, keyboard shortcuts,
   world isolation, migrations, coordinate validation/clipboard copying, project/location relationships, inline @mentions/autocomplete/hover previews, project checklists, and responsive light/dark layouts.
 - The compiled desktop app created a world through its UI. After stopping and
   restarting the process, the world appeared again on its dashboard. A journal
@@ -172,14 +172,16 @@ Open a project from the world, its location, or a journal mention. In **Checklis
 choose **Add task**, name the step, and save. Check or uncheck a box to save its
 completion immediately. The task menu lets you rename or delete a step, with
 confirmation before deletion. Progress shows completed tasks out of the total.
-Tasks stay in the order added, including when renamed or completed. Changing a
+Use **Move up** or **Move down** in the task menu to arrange your build steps.
+The first and last task disable moves beyond the ends. Order saves immediately
+and stays unchanged when tasks are renamed or completed. Changing a
 checklist updates the project's last-edit time but keeps its status unchanged;
 set Planned/In progress/Complete separately through **Edit project**.
 
 Schema version 6 adds tasks and preserves existing worlds, journals, locations,
 projects and mention links. Deleting a project or world also removes its tasks.
 Task editor text is retained after save errors; leaving a changed task asks before
-discarding. Reordering, materials and subtasks remain future additions.
+discarding. Materials and subtasks remain future additions.
 
 ## Search this world
 
@@ -192,7 +194,8 @@ within the current world and update as saved records change. Use ⌘F / Ctrl+F
 while in search to focus the field, or Clear search to start again.
 
 When creating a project, choose **Add task** under **Checklist (optional)** to
-prepare its initial checklist. Draft tasks can be edited or removed before saving.
+prepare its initial checklist. Draft tasks can be edited, removed, or rearranged using their **Task order** menu
+before saving.
 The project and tasks save together; canceling discards both, and a failed save
 keeps your draft in the form. Existing projects keep their checklist controls in
 the project reading view. No database migration or dependency changes are needed.

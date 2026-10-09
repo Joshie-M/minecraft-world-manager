@@ -292,6 +292,34 @@ class _ProjectEditorState extends ConsumerState<ProjectEditor> {
                                     : null,
                               ),
                             ),
+                            PopupMenuButton<String>(
+                              tooltip: 'Task order',
+                              enabled: !saving,
+                              icon: const Icon(
+                                CupertinoIcons.arrow_up_arrow_down,
+                                size: 18,
+                              ),
+                              itemBuilder: (_) => [
+                                PopupMenuItem(
+                                  value: 'up',
+                                  enabled: tasks.indexOf(task) > 0,
+                                  child: const Text('Move up'),
+                                ),
+                                PopupMenuItem(
+                                  value: 'down',
+                                  enabled:
+                                      tasks.indexOf(task) < tasks.length - 1,
+                                  child: const Text('Move down'),
+                                ),
+                              ],
+                              onSelected: (value) => setState(() {
+                                final index = tasks.indexOf(task);
+                                final target = index + (value == 'up' ? -1 : 1);
+                                if (target >= 0 && target < tasks.length) {
+                                  tasks.insert(target, tasks.removeAt(index));
+                                }
+                              }),
+                            ),
                             IconButton(
                               tooltip: 'Remove task',
                               onPressed: saving

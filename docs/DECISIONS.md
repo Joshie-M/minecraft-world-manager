@@ -301,3 +301,22 @@ records and task state, malformed and cross-world inputs, a late SQL failure,
 empty backups, confirmation/cancellation/error flows at narrow dark and wide
 light sizes, and navigation during a pending save. Native picker behavior on Mac
 and the other platforms requires device verification after updating the app.
+
+## Checklist ordering
+
+Saved task menus offer Move up/down, with disabled end positions. Draft tasks in
+the new-project form have the same actions in a Task order menu. Menus provide
+mouse, keyboard, and touch access within the existing compact layout.
+
+Saved moves read the latest task order inside a transaction after checking world
+and project ownership. They swap the task with its current neighbor and normalize
+positions. This tolerates gaps after deletion and avoids relying on stale UI
+indices. Writes preserve titles, completion and project status, update project
+last-edit time, and roll back on failure. The UI uses saved stream order and
+reports errors; draft moves only rearrange controllers until the project saves.
+No schema or dependency changes are needed. Backups already retain task positions.
+
+Three added tests cover disk reopen, end-position no-ops, invalid ownership and
+missing IDs, rollback after partial position writes, delete/add/move behavior,
+backup restore order, and saved/draft UI moves at phone dark and desktop light
+sizes. The full suite contains 53 tests.

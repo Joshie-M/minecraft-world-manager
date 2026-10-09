@@ -169,20 +169,48 @@ class _ProjectChecklistState extends ConsumerState<ProjectChecklist> {
                             ),
                             PopupMenuButton<String>(
                               key: ValueKey('task-actions-${task.id}'),
-                              enabled: !pending.contains(task.id),
+                              enabled: pending.isEmpty,
                               tooltip: 'Task actions',
                               icon: const Icon(
                                 CupertinoIcons.ellipsis,
                                 size: 16,
                               ),
-                              onSelected: (value) =>
-                                  value == 'edit' ? edit(task) : delete(task),
-                              itemBuilder: (_) => const [
+                              onSelected: (value) {
+                                if (value == 'up' || value == 'down') {
+                                  change(
+                                    task,
+                                    () => ref
+                                        .read(taskRepositoryProvider)
+                                        .move(
+                                          worldId: widget.worldId,
+                                          projectId: widget.projectId,
+                                          id: task.id,
+                                          up: value == 'up',
+                                        ),
+                                  );
+                                } else if (value == 'edit') {
+                                  edit(task);
+                                } else {
+                                  delete(task);
+                                }
+                              },
+                              itemBuilder: (_) => [
                                 PopupMenuItem(
+                                  value: 'up',
+                                  enabled: tasks.first.id != task.id,
+                                  child: const Text('Move up'),
+                                ),
+                                PopupMenuItem(
+                                  value: 'down',
+                                  enabled: tasks.last.id != task.id,
+                                  child: const Text('Move down'),
+                                ),
+                                const PopupMenuDivider(),
+                                const PopupMenuItem(
                                   value: 'edit',
                                   child: Text('Edit task'),
                                 ),
-                                PopupMenuItem(
+                                const PopupMenuItem(
                                   value: 'delete',
                                   child: Text('Delete task'),
                                 ),
