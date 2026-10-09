@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/database/app_database.dart';
+import 'app/theme.dart';
 import 'features/worlds/world_repository.dart';
 import 'features/worlds/world_screen.dart';
 
@@ -27,17 +28,8 @@ class WorldManagerApp extends StatelessWidget {
   Widget build(BuildContext context) => MaterialApp(
     title: 'Minecraft World Manager',
     debugShowCheckedModeBanner: false,
-    theme: ThemeData(
-      colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xff397451)),
-      useMaterial3: true,
-    ),
-    darkTheme: ThemeData(
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: const Color(0xff397451),
-        brightness: Brightness.dark,
-      ),
-      useMaterial3: true,
-    ),
+    theme: appTheme(Brightness.light),
+    darkTheme: appTheme(Brightness.dark),
     home: const WorldScreen(),
   );
 }

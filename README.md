@@ -7,13 +7,21 @@ An offline Flutter companion for Minecraft. The first milestone supports a world
 
 - Linux release build succeeded.
 - Static analysis passed with no issues.
-- Three tests passed: disk CRUD/reopen, invalid data handling, and UI CRUD with
-  cancellation and confirmation of deletion.
+- Seven tests passed: disk CRUD/reopen, invalid data handling, UI CRUD, and
+  narrow/wide layouts in light/dark themes with enlarged text.
 - The compiled desktop app created a world through its UI. After stopping and
   restarting the process, the world appeared again on its dashboard.
 
 Android, iOS, macOS and Windows runners are generated but those platforms have
-not been built or tested. This is the world-management foundation, not the full MVP.
+not been built or tested in this cloud environment. The user reported the original
+macOS app running locally; the redesigned macOS build awaits local verification. This is the world-management foundation, not the full MVP.
+
+## Design preview
+
+![Redesigned dashboard with demonstration worlds](docs/screenshots/dashboard.png)
+
+The illustrated landscapes are decorative placeholders; your saved worlds and
+notes remain local.
 
 ## Cloud development commands
 
@@ -25,7 +33,7 @@ flutter pub get --enforce-lockfile
 dart run build_runner build
 flutter analyze
 flutter test
-flutter build linux
+flutter build linux --no-tree-shake-icons
 flutter run -d linux
 ```
 

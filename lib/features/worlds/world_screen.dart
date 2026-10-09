@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../app/app_shell.dart';
 import '../../core/database/app_database.dart';
 import '../../main.dart';
 
@@ -8,110 +9,304 @@ class WorldScreen extends ConsumerWidget {
   const WorldScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) => Scaffold(
-    appBar: AppBar(title: const Text('Your worlds')),
-    floatingActionButton: FloatingActionButton.extended(
-      onPressed: () => showWorldEditor(context, ref),
-      icon: const Icon(Icons.add),
-      label: const Text('New world'),
-    ),
-    body: ref
-        .watch(worldsProvider)
-        .when(
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, _) => Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text('Your worlds could not be loaded.'),
-                TextButton(
-                  onPressed: () => ref.invalidate(worldsProvider),
-                  child: const Text('Retry'),
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    return AppShell(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final inset = constraints.maxWidth < 600 ? 20.0 : 40.0;
+          return CustomScrollView(
+            slivers: [
+              SliverPadding(
+                padding: EdgeInsets.fromLTRB(inset, 32, inset, 28),
+                sliver: SliverToBoxAdapter(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'YOUR PERSONAL ATLAS',
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          letterSpacing: 2,
+                          color: theme.colorScheme.primary,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Wrap(
+                        alignment: WrapAlignment.spaceBetween,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        spacing: 24,
+                        runSpacing: 16,
+                        children: [
+                          Text(
+                            'Your worlds',
+                            style: theme.textTheme.headlineLarge,
+                          ),
+                          FilledButton.icon(
+                            onPressed: () => showWorldEditor(context, ref),
+                            icon: const Icon(Icons.add, size: 18),
+                            label: const Text('New world'),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        'Keep the places you explore and the stories you make.',
+                        style: theme.textTheme.bodyLarge,
+                      ),
+                    ],
+                  ),
                 ),
-              ],
-            ),
-          ),
-          data: (worlds) => worlds.isEmpty
-              ? Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(24),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
+              ),
+              ref
+                  .watch(worldsProvider)
+                  .when(
+                    loading: () => const SliverFillRemaining(
+                      child: Center(child: CircularProgressIndicator()),
+                    ),
+                    error: (_, _) => SliverFillRemaining(
+                      child: Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Text('Your worlds could not be loaded.'),
+                            TextButton(
+                              onPressed: () => ref.invalidate(worldsProvider),
+                              child: const Text('Retry'),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    data: (worlds) => worlds.isEmpty
+                        ? SliverToBoxAdapter(
+                            child: Padding(
+                              padding: EdgeInsets.all(inset),
+                              child: Center(
+                                child: ConstrainedBox(
+                                  constraints: const BoxConstraints(
+                                    maxWidth: 460,
+                                  ),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.all(24),
+                                        decoration: BoxDecoration(
+                                          color: theme.colorScheme.primary
+                                              .withValues(alpha: .07),
+                                          borderRadius: BorderRadius.circular(
+                                            24,
+                                          ),
+                                        ),
+                                        child: Icon(
+                                          Icons.explore_outlined,
+                                          size: 42,
+                                          color: theme.colorScheme.primary,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 24),
+                                      Text(
+                                        'An adventure worth keeping',
+                                        style: theme.textTheme.headlineSmall,
+                                        textAlign: TextAlign.center,
+                                      ),
+                                      const SizedBox(height: 12),
+                                      Text(
+                                        'Start with a world. Give it a name, a little context, and a place in your collection.',
+                                        style: theme.textTheme.bodyLarge,
+                                        textAlign: TextAlign.center,
+                                      ),
+                                      const SizedBox(height: 24),
+                                      FilledButton(
+                                        onPressed: () =>
+                                            showWorldEditor(context, ref),
+                                        child: const Text('Create a world'),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          )
+                        : SliverPadding(
+                            padding: EdgeInsets.fromLTRB(inset, 0, inset, 32),
+                            sliver: SliverGrid.builder(
+                              gridDelegate:
+                                  SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: constraints.maxWidth < 650
+                                        ? 1
+                                        : constraints.maxWidth < 1100
+                                        ? 2
+                                        : 3,
+                                    mainAxisExtent: 300,
+                                    crossAxisSpacing: 20,
+                                    mainAxisSpacing: 20,
+                                  ),
+                              itemCount: worlds.length,
+                              itemBuilder: (context, index) =>
+                                  _WorldCard(world: worlds[index]),
+                            ),
+                          ),
+                  ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _WorldCard extends StatelessWidget {
+  const _WorldCard({required this.world});
+  final World world;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Card(
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () => Navigator.of(context).push(
+          MaterialPageRoute<void>(builder: (_) => WorldOverview(id: world.id)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            WorldLandscape(edition: world.edition, height: 132),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      world.name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.titleLarge,
+                    ),
+                    const SizedBox(height: 8),
+                    Expanded(
+                      child: Text(
+                        world.description.isEmpty
+                            ? 'A new story starts here.'
+                            : world.description,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.bodyMedium,
+                      ),
+                    ),
+                    Row(
                       children: [
-                        const Icon(Icons.landscape_outlined, size: 72),
-                        const SizedBox(height: 16),
                         Text(
-                          'Every adventure starts with a world',
-                          style: Theme.of(context).textTheme.headlineSmall,
-                          textAlign: TextAlign.center,
+                          '${world.edition} edition',
+                          style: theme.textTheme.labelMedium?.copyWith(
+                            color: theme.colorScheme.primary,
+                          ),
                         ),
-                        const SizedBox(height: 8),
-                        const Text(
-                          'Add your first world to start keeping its story.',
-                        ),
-                        const SizedBox(height: 16),
-                        FilledButton(
-                          onPressed: () => showWorldEditor(context, ref),
-                          child: const Text('Create a world'),
+                        const Spacer(),
+                        Icon(
+                          Icons.arrow_forward,
+                          size: 18,
+                          color: theme.colorScheme.primary,
                         ),
                       ],
                     ),
-                  ),
-                )
-              : LayoutBuilder(
-                  builder: (context, constraints) => GridView.builder(
-                    padding: const EdgeInsets.fromLTRB(24, 16, 24, 100),
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: constraints.maxWidth < 650
-                          ? 1
-                          : constraints.maxWidth < 1050
-                          ? 2
-                          : 3,
-                      mainAxisExtent: 200,
-                      crossAxisSpacing: 16,
-                      mainAxisSpacing: 16,
-                    ),
-                    itemCount: worlds.length,
-                    itemBuilder: (context, index) {
-                      final world = worlds[index];
-                      return Card(
-                        clipBehavior: Clip.antiAlias,
-                        child: InkWell(
-                          onTap: () => Navigator.of(context).push(
-                            MaterialPageRoute<void>(
-                              builder: (_) => WorldOverview(id: world.id),
-                            ),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(24),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Icon(Icons.landscape, size: 32),
-                                const Spacer(),
-                                Text(
-                                  world.name,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: Theme.of(context).textTheme.titleLarge,
-                                ),
-                                Text('${world.edition} edition'),
-                                if (world.description.isNotEmpty)
-                                  Text(
-                                    world.description,
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
+                  ],
                 ),
+              ),
+            ),
+          ],
         ),
+      ),
+    );
+  }
+}
+
+// Decorative illustration, not a screenshot of the player's world.
+class WorldLandscape extends StatelessWidget {
+  const WorldLandscape({
+    super.key,
+    required this.edition,
+    required this.height,
+  });
+  final String edition;
+  final double height;
+  @override
+  Widget build(BuildContext context) => ExcludeSemantics(
+    child: SizedBox(
+      height: height,
+      width: double.infinity,
+      child: CustomPaint(
+        painter: _LandscapePainter(
+          Theme.of(context).brightness == Brightness.dark,
+          edition == 'Bedrock',
+        ),
+      ),
+    ),
   );
+}
+
+class _LandscapePainter extends CustomPainter {
+  _LandscapePainter(this.dark, this.bedrock);
+  final bool dark;
+  final bool bedrock;
+  @override
+  void paint(Canvas canvas, Size size) {
+    final rect = Offset.zero & size;
+    canvas.drawRect(
+      rect,
+      Paint()
+        ..color = Color(
+          dark
+              ? 0xff293b33
+              : bedrock
+              ? 0xffe4e7db
+              : 0xffe0ebe4,
+        ),
+    );
+    canvas.drawCircle(
+      Offset(size.width * .8, size.height * .28),
+      size.height * .15,
+      Paint()..color = Color(dark ? 0xff81937a : 0xfff6f4dc),
+    );
+    for (var layer = 0; layer < 3; layer++) {
+      final baseline = size.height * (.49 + layer * .18);
+      final path = Path()..moveTo(0, baseline);
+      path.cubicTo(
+        size.width * .22,
+        baseline - size.height * .3,
+        size.width * .36,
+        baseline + size.height * .25,
+        size.width * .55,
+        baseline,
+      );
+      path.cubicTo(
+        size.width * .76,
+        baseline - size.height * .28,
+        size.width * .88,
+        baseline - size.height * .06,
+        size.width,
+        baseline + size.height * .05,
+      );
+      path.lineTo(size.width, size.height);
+      path.lineTo(0, size.height);
+      path.close();
+      canvas.drawPath(
+        path,
+        Paint()
+          ..color = [
+            const Color(0xffafc6b2),
+            const Color(0xff7f9c85),
+            const Color(0xff496f58),
+          ][layer].withValues(alpha: dark ? .65 : 1),
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(_LandscapePainter oldDelegate) =>
+      dark != oldDelegate.dark || bedrock != oldDelegate.bedrock;
 }
 
 class WorldOverview extends ConsumerWidget {
@@ -126,20 +321,34 @@ class WorldOverview extends ConsumerWidget {
       if (candidate.id == id) world = candidate;
     }
     final current = world;
-    return Scaffold(
-      appBar: AppBar(title: Text(current?.name ?? 'World overview')),
-      body: current == null
+    return AppShell(
+      child: current == null
           ? const Center(
               child: Text('World unavailable. Return to your dashboard.'),
             )
           : Center(
               child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 760),
+                constraints: const BoxConstraints(maxWidth: 880),
                 child: ListView(
                   padding: const EdgeInsets.all(24),
                   children: [
-                    const Icon(Icons.landscape_outlined, size: 96),
-                    const SizedBox(height: 24),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: TextButton.icon(
+                        onPressed: () => Navigator.pop(context),
+                        icon: const Icon(Icons.arrow_back, size: 18),
+                        label: const Text('All worlds'),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(16),
+                      child: WorldLandscape(
+                        edition: current.edition,
+                        height: 180,
+                      ),
+                    ),
+                    const SizedBox(height: 28),
                     Text(
                       current.name,
                       style: Theme.of(context).textTheme.headlineLarge,
@@ -184,6 +393,14 @@ class WorldOverview extends ConsumerWidget {
                                   FilledButton(
                                     onPressed: () =>
                                         Navigator.pop(context, true),
+                                    style: FilledButton.styleFrom(
+                                      backgroundColor: Theme.of(
+                                        context,
+                                      ).colorScheme.error,
+                                      foregroundColor: Theme.of(
+                                        context,
+                                      ).colorScheme.onError,
+                                    ),
                                     child: const Text('Delete'),
                                   ),
                                 ],
@@ -207,6 +424,11 @@ class WorldOverview extends ConsumerWidget {
                           },
                           icon: const Icon(Icons.delete_outline),
                           label: const Text('Delete world'),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: Theme.of(
+                              context,
+                            ).colorScheme.error,
+                          ),
                         ),
                       ],
                     ),

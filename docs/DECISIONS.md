@@ -20,8 +20,8 @@ Initial metadata: name, edition, description, ID and timestamps.
 
 ## Validation
 
-Linux release build and static analysis passed. Three tests passed, covering disk
-CRUD/reopen, invalid input/missing updates, and UI creation/edit/deletion. The
+Linux release build and static analysis passed. Seven tests passed, covering disk
+CRUD/reopen, invalid input/missing updates, UI creation/edit/deletion, and narrow/wide layouts in both themes at 150% text size. The
 compiled app created a world and displayed it after an actual process restart.
 Headless smoke data is isolated at /workspace/smoke-data.
 
@@ -43,3 +43,23 @@ No archive/favorite actions or remaining world metadata yet. No backup, image
 handling, journal, locations, builds or discoveries yet. Future schema changes
 must include upgrade migrations and tests. Next milestone: journal CRUD with
 Markdown notes, world isolation, search, save feedback and tests.
+
+## UI redesign
+
+The user prefers a modern, platform-neutral app over default Android styling.
+The shared theme now uses neutral backgrounds, restrained forest-green accents,
+outlined form fields, compact rounded buttons, and flat bordered cards. Desktop
+windows have a library sidebar; smaller windows retain one content column.
+World cards use decorative landscape illustrations rather than implying a world
+screenshot exists. Overview and editor share the visual language. Deletion uses
+red accents and remains confirmed. No persistence changes or extra dependencies.
+
+A short-window empty-state overflow was caught during UI testing and fixed by
+making the empty state scroll naturally. Continue refining this direction with
+user feedback before adding journal screens. The user reported the original app
+running on macOS; the redesigned macOS build still needs their local verification.
+
+Linux release verification exposed incorrect icon glyphs with Flutter's default
+font subsetting. Rebuilding with `--no-tree-shake-icons` restored the icons; use
+that flag for Linux release builds until the SDK issue is resolved. Debug builds
+on the Mac still need the user's visual check.

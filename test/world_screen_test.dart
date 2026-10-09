@@ -4,8 +4,54 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:minecraft_world_manager/core/database/app_database.dart';
 import 'package:minecraft_world_manager/main.dart';
+import 'package:minecraft_world_manager/app/theme.dart';
+import 'package:minecraft_world_manager/features/worlds/world_repository.dart';
+import 'package:minecraft_world_manager/features/worlds/world_screen.dart';
 
 void main() {
+  for (final width in [390.0, 1280.0]) {
+    for (final brightness in Brightness.values) {
+      testWidgets('world dashboard at width $width in $brightness', (
+        tester,
+      ) async {
+        await tester.binding.setSurfaceSize(Size(width, 900));
+        addTearDown(() => tester.binding.setSurfaceSize(null));
+        final database = AppDatabase.forTesting(NativeDatabase.memory());
+        addTearDown(database.close);
+        await WorldRepository(database).save(
+          name: 'A world with a longer name',
+          edition: 'Java',
+          description:
+              'A peaceful place for building, exploring, and keeping memories.',
+        );
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [databaseProvider.overrideWithValue(database)],
+            child: MaterialApp(
+              theme: appTheme(brightness),
+              builder: (context, child) => MediaQuery(
+                data: MediaQuery.of(
+                  context,
+                ).copyWith(textScaler: const TextScaler.linear(1.5)),
+                child: child!,
+              ),
+              home: const WorldScreen(),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        expect(find.text('A world with a longer name'), findsOneWidget);
+        expect(find.text('New world'), findsOneWidget);
+        expect(
+          find.text('WORLD\nMANAGER'),
+          width >= 900 ? findsOneWidget : findsNothing,
+        );
+        expect(tester.takeException(), isNull);
+        await tester.pumpWidget(const SizedBox.shrink());
+        await tester.pumpAndSettle();
+      });
+    }
+  }
   testWidgets('create, edit, cancel deletion, then delete through the UI', (
     tester,
   ) async {
@@ -18,6 +64,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('Create a world'));
     await tester.tap(find.text('Create a world'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Save world'));
