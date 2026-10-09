@@ -31,6 +31,7 @@ void main() {
         // All other tables are identical to schema 5; removing the new table yields a real old-schema fixture.
         final old = sqlite3.open(file.path);
         old.execute('DROP TABLE project_tasks');
+        old.execute('DROP TABLE project_materials');
         old.execute('PRAGMA user_version=5');
         old.close();
         db = AppDatabase.forTesting(NativeDatabase(file));
@@ -75,7 +76,7 @@ void main() {
               .data
               .values
               .single,
-          6,
+          7,
         );
         await repo.setCompleted(
           worldId: w,

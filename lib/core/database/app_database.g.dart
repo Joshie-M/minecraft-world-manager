@@ -2807,6 +2807,363 @@ class ProjectTasksCompanion extends UpdateCompanion<ProjectTask> {
   }
 }
 
+class $ProjectMaterialsTable extends ProjectMaterials
+    with TableInfo<$ProjectMaterialsTable, ProjectMaterial> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ProjectMaterialsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _projectIdMeta = const VerificationMeta(
+    'projectId',
+  );
+  @override
+  late final GeneratedColumn<String> projectId = GeneratedColumn<String>(
+    'project_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES projects (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 100,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _neededMeta = const VerificationMeta('needed');
+  @override
+  late final GeneratedColumn<int> needed = GeneratedColumn<int>(
+    'needed',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _gatheredMeta = const VerificationMeta(
+    'gathered',
+  );
+  @override
+  late final GeneratedColumn<int> gathered = GeneratedColumn<int>(
+    'gathered',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, projectId, name, needed, gathered];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'project_materials';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ProjectMaterial> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('project_id')) {
+      context.handle(
+        _projectIdMeta,
+        projectId.isAcceptableOrUnknown(data['project_id']!, _projectIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_projectIdMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('needed')) {
+      context.handle(
+        _neededMeta,
+        needed.isAcceptableOrUnknown(data['needed']!, _neededMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_neededMeta);
+    }
+    if (data.containsKey('gathered')) {
+      context.handle(
+        _gatheredMeta,
+        gathered.isAcceptableOrUnknown(data['gathered']!, _gatheredMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ProjectMaterial map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ProjectMaterial(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      projectId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}project_id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      needed: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}needed'],
+      )!,
+      gathered: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}gathered'],
+      )!,
+    );
+  }
+
+  @override
+  $ProjectMaterialsTable createAlias(String alias) {
+    return $ProjectMaterialsTable(attachedDatabase, alias);
+  }
+}
+
+class ProjectMaterial extends DataClass implements Insertable<ProjectMaterial> {
+  final String id;
+  final String projectId;
+  final String name;
+  final int needed;
+  final int gathered;
+  const ProjectMaterial({
+    required this.id,
+    required this.projectId,
+    required this.name,
+    required this.needed,
+    required this.gathered,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['project_id'] = Variable<String>(projectId);
+    map['name'] = Variable<String>(name);
+    map['needed'] = Variable<int>(needed);
+    map['gathered'] = Variable<int>(gathered);
+    return map;
+  }
+
+  ProjectMaterialsCompanion toCompanion(bool nullToAbsent) {
+    return ProjectMaterialsCompanion(
+      id: Value(id),
+      projectId: Value(projectId),
+      name: Value(name),
+      needed: Value(needed),
+      gathered: Value(gathered),
+    );
+  }
+
+  factory ProjectMaterial.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ProjectMaterial(
+      id: serializer.fromJson<String>(json['id']),
+      projectId: serializer.fromJson<String>(json['projectId']),
+      name: serializer.fromJson<String>(json['name']),
+      needed: serializer.fromJson<int>(json['needed']),
+      gathered: serializer.fromJson<int>(json['gathered']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'projectId': serializer.toJson<String>(projectId),
+      'name': serializer.toJson<String>(name),
+      'needed': serializer.toJson<int>(needed),
+      'gathered': serializer.toJson<int>(gathered),
+    };
+  }
+
+  ProjectMaterial copyWith({
+    String? id,
+    String? projectId,
+    String? name,
+    int? needed,
+    int? gathered,
+  }) => ProjectMaterial(
+    id: id ?? this.id,
+    projectId: projectId ?? this.projectId,
+    name: name ?? this.name,
+    needed: needed ?? this.needed,
+    gathered: gathered ?? this.gathered,
+  );
+  ProjectMaterial copyWithCompanion(ProjectMaterialsCompanion data) {
+    return ProjectMaterial(
+      id: data.id.present ? data.id.value : this.id,
+      projectId: data.projectId.present ? data.projectId.value : this.projectId,
+      name: data.name.present ? data.name.value : this.name,
+      needed: data.needed.present ? data.needed.value : this.needed,
+      gathered: data.gathered.present ? data.gathered.value : this.gathered,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ProjectMaterial(')
+          ..write('id: $id, ')
+          ..write('projectId: $projectId, ')
+          ..write('name: $name, ')
+          ..write('needed: $needed, ')
+          ..write('gathered: $gathered')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, projectId, name, needed, gathered);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ProjectMaterial &&
+          other.id == this.id &&
+          other.projectId == this.projectId &&
+          other.name == this.name &&
+          other.needed == this.needed &&
+          other.gathered == this.gathered);
+}
+
+class ProjectMaterialsCompanion extends UpdateCompanion<ProjectMaterial> {
+  final Value<String> id;
+  final Value<String> projectId;
+  final Value<String> name;
+  final Value<int> needed;
+  final Value<int> gathered;
+  final Value<int> rowid;
+  const ProjectMaterialsCompanion({
+    this.id = const Value.absent(),
+    this.projectId = const Value.absent(),
+    this.name = const Value.absent(),
+    this.needed = const Value.absent(),
+    this.gathered = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ProjectMaterialsCompanion.insert({
+    required String id,
+    required String projectId,
+    required String name,
+    required int needed,
+    this.gathered = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       projectId = Value(projectId),
+       name = Value(name),
+       needed = Value(needed);
+  static Insertable<ProjectMaterial> custom({
+    Expression<String>? id,
+    Expression<String>? projectId,
+    Expression<String>? name,
+    Expression<int>? needed,
+    Expression<int>? gathered,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (projectId != null) 'project_id': projectId,
+      if (name != null) 'name': name,
+      if (needed != null) 'needed': needed,
+      if (gathered != null) 'gathered': gathered,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ProjectMaterialsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? projectId,
+    Value<String>? name,
+    Value<int>? needed,
+    Value<int>? gathered,
+    Value<int>? rowid,
+  }) {
+    return ProjectMaterialsCompanion(
+      id: id ?? this.id,
+      projectId: projectId ?? this.projectId,
+      name: name ?? this.name,
+      needed: needed ?? this.needed,
+      gathered: gathered ?? this.gathered,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (projectId.present) {
+      map['project_id'] = Variable<String>(projectId.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (needed.present) {
+      map['needed'] = Variable<int>(needed.value);
+    }
+    if (gathered.present) {
+      map['gathered'] = Variable<int>(gathered.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ProjectMaterialsCompanion(')
+          ..write('id: $id, ')
+          ..write('projectId: $projectId, ')
+          ..write('name: $name, ')
+          ..write('needed: $needed, ')
+          ..write('gathered: $gathered, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -2819,6 +3176,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $JournalProjectTagsTable journalProjectTags =
       $JournalProjectTagsTable(this);
   late final $ProjectTasksTable projectTasks = $ProjectTasksTable(this);
+  late final $ProjectMaterialsTable projectMaterials = $ProjectMaterialsTable(
+    this,
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -2831,6 +3191,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     journalLocationTags,
     journalProjectTags,
     projectTasks,
+    projectMaterials,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -2896,6 +3257,13 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         limitUpdateKind: UpdateKind.delete,
       ),
       result: [TableUpdate('project_tasks', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'projects',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('project_materials', kind: UpdateKind.delete)],
     ),
   ]);
 }
@@ -4703,6 +5071,26 @@ final class $$ProjectsTableReferences
       manager.$state.copyWith(prefetchedData: cache),
     );
   }
+
+  static MultiTypedResultKey<$ProjectMaterialsTable, List<ProjectMaterial>>
+  _projectMaterialsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.projectMaterials,
+    aliasName: 'projects__id__project_materials__project_id',
+  );
+
+  $$ProjectMaterialsTableProcessedTableManager get projectMaterialsRefs {
+    final manager = $$ProjectMaterialsTableTableManager(
+      $_db,
+      $_db.projectMaterials,
+    ).filter((f) => f.projectId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _projectMaterialsRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
 }
 
 class $$ProjectsTableFilterComposer
@@ -4831,6 +5219,31 @@ class $$ProjectsTableFilterComposer
           }) => $$ProjectTasksTableFilterComposer(
             $db: $db,
             $table: $db.projectTasks,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> projectMaterialsRefs(
+    Expression<bool> Function($$ProjectMaterialsTableFilterComposer f) f,
+  ) {
+    final $$ProjectMaterialsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.projectMaterials,
+      getReferencedColumn: (t) => t.projectId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ProjectMaterialsTableFilterComposer(
+            $db: $db,
+            $table: $db.projectMaterials,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -5050,6 +5463,31 @@ class $$ProjectsTableAnnotationComposer
     );
     return f(composer);
   }
+
+  Expression<T> projectMaterialsRefs<T extends Object>(
+    Expression<T> Function($$ProjectMaterialsTableAnnotationComposer a) f,
+  ) {
+    final $$ProjectMaterialsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.projectMaterials,
+      getReferencedColumn: (t) => t.projectId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ProjectMaterialsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.projectMaterials,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$ProjectsTableTableManager
@@ -5070,6 +5508,7 @@ class $$ProjectsTableTableManager
             bool locationId,
             bool journalProjectTagsRefs,
             bool projectTasksRefs,
+            bool projectMaterialsRefs,
           })
         > {
   $$ProjectsTableTableManager(_$AppDatabase db, $ProjectsTable table)
@@ -5141,12 +5580,14 @@ class $$ProjectsTableTableManager
                 locationId = false,
                 journalProjectTagsRefs = false,
                 projectTasksRefs = false,
+                projectMaterialsRefs = false,
               }) {
                 return PrefetchHooks(
                   db: db,
                   explicitlyWatchedTables: [
                     if (journalProjectTagsRefs) db.journalProjectTags,
                     if (projectTasksRefs) db.projectTasks,
+                    if (projectMaterialsRefs) db.projectMaterials,
                   ],
                   addJoins:
                       <
@@ -5237,6 +5678,27 @@ class $$ProjectsTableTableManager
                               ),
                           typedResults: items,
                         ),
+                      if (projectMaterialsRefs)
+                        await $_getPrefetchedData<
+                          Project,
+                          $ProjectsTable,
+                          ProjectMaterial
+                        >(
+                          currentTable: table,
+                          referencedTable: $$ProjectsTableReferences
+                              ._projectMaterialsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$ProjectsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).projectMaterialsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.projectId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
                     ];
                   },
                 );
@@ -5262,6 +5724,7 @@ typedef $$ProjectsTableProcessedTableManager =
         bool locationId,
         bool journalProjectTagsRefs,
         bool projectTasksRefs,
+        bool projectMaterialsRefs,
       })
     >;
 typedef $$JournalLocationTagsTableCreateCompanionBuilder =
@@ -6318,6 +6781,332 @@ typedef $$ProjectTasksTableProcessedTableManager =
       ProjectTask,
       PrefetchHooks Function({bool projectId})
     >;
+typedef $$ProjectMaterialsTableCreateCompanionBuilder =
+    ProjectMaterialsCompanion Function({
+      required String id,
+      required String projectId,
+      required String name,
+      required int needed,
+      Value<int> gathered,
+      Value<int> rowid,
+    });
+typedef $$ProjectMaterialsTableUpdateCompanionBuilder =
+    ProjectMaterialsCompanion Function({
+      Value<String> id,
+      Value<String> projectId,
+      Value<String> name,
+      Value<int> needed,
+      Value<int> gathered,
+      Value<int> rowid,
+    });
+
+final class $$ProjectMaterialsTableReferences
+    extends
+        BaseReferences<_$AppDatabase, $ProjectMaterialsTable, ProjectMaterial> {
+  $$ProjectMaterialsTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $ProjectsTable _projectIdTable(_$AppDatabase db) =>
+      db.projects.createAlias('project_materials__project_id__projects__id');
+
+  $$ProjectsTableProcessedTableManager get projectId {
+    final $_column = $_itemColumn<String>('project_id')!;
+
+    final manager = $$ProjectsTableTableManager(
+      $_db,
+      $_db.projects,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_projectIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$ProjectMaterialsTableFilterComposer
+    extends Composer<_$AppDatabase, $ProjectMaterialsTable> {
+  $$ProjectMaterialsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get needed => $composableBuilder(
+    column: $table.needed,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get gathered => $composableBuilder(
+    column: $table.gathered,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$ProjectsTableFilterComposer get projectId {
+    final $$ProjectsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.projectId,
+      referencedTable: $db.projects,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ProjectsTableFilterComposer(
+            $db: $db,
+            $table: $db.projects,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ProjectMaterialsTableOrderingComposer
+    extends Composer<_$AppDatabase, $ProjectMaterialsTable> {
+  $$ProjectMaterialsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get needed => $composableBuilder(
+    column: $table.needed,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get gathered => $composableBuilder(
+    column: $table.gathered,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$ProjectsTableOrderingComposer get projectId {
+    final $$ProjectsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.projectId,
+      referencedTable: $db.projects,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ProjectsTableOrderingComposer(
+            $db: $db,
+            $table: $db.projects,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ProjectMaterialsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ProjectMaterialsTable> {
+  $$ProjectMaterialsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<int> get needed =>
+      $composableBuilder(column: $table.needed, builder: (column) => column);
+
+  GeneratedColumn<int> get gathered =>
+      $composableBuilder(column: $table.gathered, builder: (column) => column);
+
+  $$ProjectsTableAnnotationComposer get projectId {
+    final $$ProjectsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.projectId,
+      referencedTable: $db.projects,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ProjectsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.projects,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ProjectMaterialsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ProjectMaterialsTable,
+          ProjectMaterial,
+          $$ProjectMaterialsTableFilterComposer,
+          $$ProjectMaterialsTableOrderingComposer,
+          $$ProjectMaterialsTableAnnotationComposer,
+          $$ProjectMaterialsTableCreateCompanionBuilder,
+          $$ProjectMaterialsTableUpdateCompanionBuilder,
+          (ProjectMaterial, $$ProjectMaterialsTableReferences),
+          ProjectMaterial,
+          PrefetchHooks Function({bool projectId})
+        > {
+  $$ProjectMaterialsTableTableManager(
+    _$AppDatabase db,
+    $ProjectMaterialsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ProjectMaterialsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ProjectMaterialsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ProjectMaterialsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> projectId = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<int> needed = const Value.absent(),
+                Value<int> gathered = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ProjectMaterialsCompanion(
+                id: id,
+                projectId: projectId,
+                name: name,
+                needed: needed,
+                gathered: gathered,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String projectId,
+                required String name,
+                required int needed,
+                Value<int> gathered = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ProjectMaterialsCompanion.insert(
+                id: id,
+                projectId: projectId,
+                name: name,
+                needed: needed,
+                gathered: gathered,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$ProjectMaterialsTable, ProjectMaterial>(table),
+                  $$ProjectMaterialsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({projectId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (projectId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.projectId,
+                                referencedTable:
+                                    $$ProjectMaterialsTableReferences
+                                        ._projectIdTable(db),
+                                referencedColumn:
+                                    $$ProjectMaterialsTableReferences
+                                        ._projectIdTable(db)
+                                        .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$ProjectMaterialsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ProjectMaterialsTable,
+      ProjectMaterial,
+      $$ProjectMaterialsTableFilterComposer,
+      $$ProjectMaterialsTableOrderingComposer,
+      $$ProjectMaterialsTableAnnotationComposer,
+      $$ProjectMaterialsTableCreateCompanionBuilder,
+      $$ProjectMaterialsTableUpdateCompanionBuilder,
+      (ProjectMaterial, $$ProjectMaterialsTableReferences),
+      ProjectMaterial,
+      PrefetchHooks Function({bool projectId})
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -6336,4 +7125,6 @@ class $AppDatabaseManager {
       $$JournalProjectTagsTableTableManager(_db, _db.journalProjectTags);
   $$ProjectTasksTableTableManager get projectTasks =>
       $$ProjectTasksTableTableManager(_db, _db.projectTasks);
+  $$ProjectMaterialsTableTableManager get projectMaterials =>
+      $$ProjectMaterialsTableTableManager(_db, _db.projectMaterials);
 }

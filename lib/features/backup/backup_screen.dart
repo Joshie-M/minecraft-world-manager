@@ -63,7 +63,7 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
         content: SingleChildScrollView(
           child: Text(
             'Worlds: ${backup.worlds.length} · Journal entries: ${backup.entries.length}\n'
-            '${backup.locations.length} locations · ${backup.projects.length} projects · ${backup.tasks.length} tasks\n\n'
+            '${backup.locations.length} locations · ${backup.projects.length} projects · ${backup.tasks.length} tasks · ${backup.materials.length} materials\n\n'
             'These will be added as separate worlds with “(restored)” in their names. '
             'Your current worlds will stay as they are. Restoring the same file again adds another copy.',
           ),
@@ -124,7 +124,7 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
                     ),
                     const SizedBox(height: 8),
                     const Text(
-                      'Save all worlds, journal entries, locations, projects, and checklists in one backup file. Journal links and task completion are included.',
+                      'Save all worlds, journal entries, locations, projects, materials, and checklists in one backup file. Journal links and task completion are included.',
                     ),
                     const SizedBox(height: 16),
                     Align(

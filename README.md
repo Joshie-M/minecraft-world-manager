@@ -7,7 +7,7 @@ notes, saved coordinates, world projects, search, and local SQLite persistence.
 
 - Linux release build succeeded.
 - Static analysis passed with no issues.
-- Fifty-six tests passed: disk CRUD/reopen, invalid data handling, world/journal UI CRUD, keyboard shortcuts,
+- Sixty tests passed: disk CRUD/reopen, invalid data handling, world/journal UI CRUD, keyboard shortcuts,
   world isolation, migrations, coordinate validation/clipboard copying, project/location relationships, inline @mentions/autocomplete/hover previews, project checklists, and responsive light/dark layouts.
 - The compiled desktop app created a world through its UI. After stopping and
   restarting the process, the world appeared again on its dashboard. A journal
@@ -182,7 +182,7 @@ set Planned/In progress/Complete separately through **Edit project**.
 Schema version 6 adds tasks and preserves existing worlds, journals, locations,
 projects and mention links. Deleting a project or world also removes its tasks.
 Task editor text is retained after save errors; leaving a changed task asks before
-discarding. Materials and subtasks remain future additions.
+discarding. Subtasks remain a future addition.
 
 ## Search this world
 
@@ -206,7 +206,7 @@ the project reading view. No database migration or dependency changes are needed
 
 From **Your worlds**, choose the **Backup & restore** toolbar icon.
 **Save backup** exports all World Manager worlds, journal entries, locations,
-projects, tasks, and journal associations to a portable `.json` file using the
+projects, tasks, materials, and journal associations to a portable `.json` file using the
 system save dialog. Checklist completion, task order, timestamps, coordinates,
 project locations, and internal journal links are included.
 
@@ -217,7 +217,8 @@ Existing worlds remain untouched. Restoring the same file again adds another set
 of copies; it does not merge or replace records. Missing mention targets remain
 unavailable. Restore runs in one transaction, so failure leaves no partial import.
 
-The versioned backup format rejects unsupported versions, invalid records,
+New exports use backup version 2; version 1 backups still restore with empty
+materials lists. The versioned backup format rejects unsupported versions, invalid records,
 duplicate IDs, orphan records, and cross-world associations. Files are limited to
 20 MB. Backups contain plain text and coordinates; keep them somewhere you trust.
 These are World Manager records, not Minecraft's game save folders.
@@ -228,3 +229,19 @@ this change so the plugin and entitlements are installed. File dialog behavior o
 macOS, Windows, iOS, and Android still needs verification on those platforms;
 cloud checks cover database round trips, UI flows with an injected file adapter,
 and the Linux build.
+
+## Project materials
+
+Open a project and choose **Materials → Add material**. Enter a supply name,
+the quantity needed, and the quantity already gathered. Quantities count individual
+items and must be whole numbers: needed is 1–1,000,000 and gathered is
+0–1,000,000. Extra gathered items are allowed. Tap a material to edit its quantities
+or use its menu to **Mark gathered**, edit, or delete it. Deletion asks first.
+Mark gathered fills the needed amount without reducing any surplus.
+
+The list shows each material's gathered/needed quantities and how many material
+lines are ready. Material changes save locally and do not change project status
+or checklist completion. The editor protects unsaved changes and retains input
+on save errors. Materials are included in new backups and restored with the
+corresponding project copies. Schema 7 adds the materials table while preserving
+existing records; deleting a project or world removes its materials as well.

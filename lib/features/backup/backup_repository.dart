@@ -6,6 +6,7 @@ import '../../core/database/app_database.dart';
 import '../../main.dart';
 import '../projects/project_repository.dart';
 import '../journal/mention_controller.dart';
+import '../projects/material_repository.dart';
 
 const maxBackupBytes = 20 * 1024 * 1024;
 final backupRepositoryProvider = Provider(
@@ -21,12 +22,14 @@ class WorldBackup {
     this.tasks,
     this.locationTags,
     this.projectTags,
+    this.materials,
   );
   final List<World> worlds;
   final List<JournalEntry> entries;
   final List<Location> locations;
   final List<Project> projects;
   final List<ProjectTask> tasks;
+  final List<ProjectMaterial> materials;
   final List<JournalLocationTag> locationTags;
   final List<JournalProjectTag> projectTags;
 
@@ -36,7 +39,8 @@ class WorldBackup {
     }
     try {
       final root = jsonDecode(utf8.decode(bytes)) as Map<String, dynamic>;
-      if (root['format'] != 'minecraft-world-manager' || root['version'] != 1) {
+      if (root['format'] != 'minecraft-world-manager' ||
+          ![1, 2].contains(root['version'])) {
         throw const FormatException(
           'This file is not a supported World Manager backup.',
         );
@@ -57,6 +61,7 @@ class WorldBackup {
         rows('tasks', ProjectTask.fromJson),
         rows('locationTags', JournalLocationTag.fromJson),
         rows('projectTags', JournalProjectTag.fromJson),
+        root['version'] == 1 ? [] : rows('materials', ProjectMaterial.fromJson),
       );
       backup._validate();
       return backup;
@@ -95,6 +100,17 @@ class WorldBackup {
     final l = index(locations, (l) => l.id);
     final p = index(projects, (p) => p.id);
     index(tasks, (t) => t.id);
+    index(materials, (m) => m.id);
+    for (final material in materials) {
+      require(
+        p.containsKey(material.projectId) &&
+            name(material.name, 100) &&
+            material.needed >= 1 &&
+            material.needed <= maxMaterialQuantity &&
+            material.gathered >= 0 &&
+            material.gathered <= maxMaterialQuantity,
+      );
+    }
     for (final world in worlds) {
       require(
         name(world.name, 100) && ['Java', 'Bedrock'].contains(world.edition),
@@ -158,7 +174,10 @@ class BackupRepository {
   Future<Uint8List> export() => db.transaction(() async {
     final data = {
       'format': 'minecraft-world-manager',
-      'version': 1,
+      'version': 2,
+      'materials': (await db.select(db.projectMaterials).get())
+          .map((r) => r.toJson())
+          .toList(),
       'createdAt': DateTime.now().toUtc().toIso8601String(),
       'worlds': (await db.select(db.worlds).get())
           .map((r) => r.toJson())
@@ -248,6 +267,16 @@ class BackupRepository {
               t.copyWith(
                 id: const Uuid().v4(),
                 projectId: projects[t.projectId]!,
+              ),
+            );
+      }
+      for (final material in backup.materials) {
+        await db
+            .into(db.projectMaterials)
+            .insert(
+              material.copyWith(
+                id: const Uuid().v4(),
+                projectId: projects[material.projectId]!,
               ),
             );
       }

@@ -71,7 +71,7 @@ void main() {
             .data
             .values
             .single,
-        6,
+        7,
       );
       // Calls that omit tags preserve existing associations.
       await repo.save(

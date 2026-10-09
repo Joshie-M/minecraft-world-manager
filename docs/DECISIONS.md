@@ -339,3 +339,30 @@ Three additional tests cover invalid snapshots and rollback, plus actual pointer
 drags in phone dark and desktop light layouts for saved and draft tasks, including
 movement in both directions, preserved checkbox state, and failed-drop recovery.
 The full suite contains 56 tests. Linux build checks are separate from Mac testing.
+
+## Project materials milestone
+
+Schema 7 adds project-owned material records with name, quantity needed, and
+quantity gathered. Names are required and limited to 100 characters; quantities
+are whole individual-item counts bounded to one million. Needed must be positive
+and gathered may be zero or above the needed count. Materials sort by name and
+show ready-line counts rather than combining unlike supplies into one total.
+Mark gathered fills the required quantity but never reduces a surplus.
+
+Repository mutations check world/project ownership inside transactions and touch
+project last-edit time while preserving project status and checklist state.
+Project/world deletion cascades through materials. The reading view reuses the
+existing compact section and modal editor patterns, including dirty confirmations,
+keyboard save, retained input after errors, and explicit delete confirmation.
+
+Backups now export version 2 with materials. The parser accepts versions 1 and 2;
+version 1 restores without materials. Version 2 requires and validates materials,
+and restore assigns fresh IDs and maps them to restored project IDs in the same
+transaction as the other records. This prevents old app versions from silently
+losing materials when reading a newer backup. Existing migration tests now check
+schema 7, and the schema 5 fixture removes both later-added tables.
+
+Four new tests cover migration from schema 6, disk reopen, gathered quantities,
+surplus handling, backup round trips and legacy parsing, invalid ownership/input,
+project/world cascade, and CRUD/error/discard UI at phone dark and desktop light
+widths. The full suite contains 60 tests; Mac verification follows the update.

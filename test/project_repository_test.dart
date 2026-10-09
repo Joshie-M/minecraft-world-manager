@@ -70,7 +70,7 @@ void main() {
             .data
             .values
             .single,
-        6,
+        7,
       );
       await LocationRepository(db).delete(worldId: 'w', id: 'l');
       final detached = (await repo.watch('w').first).single;
