@@ -56,7 +56,7 @@ void main() {
               .data
               .values
               .single,
-          5,
+          6,
         );
         await repository.delete(worldId: 'existing', id: id);
         expect(await repository.watch('existing').first, isEmpty);

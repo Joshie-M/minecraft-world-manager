@@ -84,6 +84,17 @@ class JournalProjectTags extends Table {
   Set<Column> get primaryKey => {entryId, projectId};
 }
 
+class ProjectTasks extends Table {
+  TextColumn get id => text()();
+  TextColumn get projectId =>
+      text().references(Projects, #id, onDelete: KeyAction.cascade)();
+  TextColumn get title => text().withLength(min: 1, max: 200)();
+  BoolColumn get completed => boolean().withDefault(const Constant(false))();
+  IntColumn get position => integer()();
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
 @DriftDatabase(
   tables: [
     Worlds,
@@ -92,6 +103,7 @@ class JournalProjectTags extends Table {
     Projects,
     JournalLocationTags,
     JournalProjectTags,
+    ProjectTasks,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -99,7 +111,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -108,6 +120,7 @@ class AppDatabase extends _$AppDatabase {
       if (from < 2) await m.createTable(journalEntries);
       if (from < 3) await m.createTable(locations);
       if (from < 4) await m.createTable(projects);
+      if (from < 6) await m.createTable(projectTasks);
       if (from < 5) {
         await m.createTable(journalLocationTags);
         await m.createTable(journalProjectTags);

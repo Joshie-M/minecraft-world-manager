@@ -7,8 +7,8 @@ notes, saved coordinates, world projects, search, and local SQLite persistence.
 
 - Linux release build succeeded.
 - Static analysis passed with no issues.
-- Thirty-three tests passed: disk CRUD/reopen, invalid data handling, world/journal UI CRUD, keyboard shortcuts,
-  world isolation, migrations, coordinate validation/clipboard copying, project/location relationships, inline @mentions/autocomplete/hover previews, and responsive light/dark layouts.
+- Thirty-seven tests passed: disk CRUD/reopen, invalid data handling, world/journal UI CRUD, keyboard shortcuts,
+  world isolation, migrations, coordinate validation/clipboard copying, project/location relationships, inline @mentions/autocomplete/hover previews, project checklists, and responsive light/dark layouts.
 - The compiled desktop app created a world through its UI. After stopping and
   restarting the process, the world appeared again on its dashboard. A journal
   entry was also saved through the compiled UI and displayed after restart.
@@ -131,7 +131,7 @@ Deleting a linked location removes the link and keeps the project and notes.
 Deleting a world also deletes its projects after confirmation. Changes require
 explicit saving (Command+Enter / Control+Enter); leaving a changed editor asks
 before discarding. Save before quitting—crash-recovery drafts are not implemented.
-Task checklists, materials, images, free-form labels and multiple location links are deferred.
+Materials, images, free-form labels and multiple location links are deferred.
 
 ## Inline @mentions & location projects
 
@@ -157,7 +157,7 @@ can repeat or change without redirecting a link. Editing inside a mention turns
 that edited text into plain text; deleting it removes its association on save.
 Markdown formatting around a complete mention preserves the link.
 
-No database migration is needed; schema 5 still stores record associations.
+Inline mentions use the record association tables introduced in schema 5.
 Existing separate tags remain readable until editing: the editor adds them as
 inline mentions on a `Related:` line, which you can move into your text or remove.
 They become inline links when you save. Journal text and associations save together.
@@ -165,3 +165,18 @@ Deleted record mentions retain their text and show an unavailable message; editi
 and saving such an entry keeps its notes without recreating removed associations.
 The existing Markdown parser package is now a direct dependency at its locked
 version, with no package version updates.
+
+## Project checklists
+
+Open a project from the world, its location, or a journal mention. In **Checklist**,
+choose **Add task**, name the step, and save. Check or uncheck a box to save its
+completion immediately. The task menu lets you rename or delete a step, with
+confirmation before deletion. Progress shows completed tasks out of the total.
+Tasks stay in the order added, including when renamed or completed. Changing a
+checklist updates the project's last-edit time but keeps its status unchanged;
+set Planned/In progress/Complete separately through **Edit project**.
+
+Schema version 6 adds tasks and preserves existing worlds, journals, locations,
+projects and mention links. Deleting a project or world also removes its tasks.
+Task editor text is retained after save errors; leaving a changed task asks before
+discarding. Reordering, materials and subtasks remain future additions.

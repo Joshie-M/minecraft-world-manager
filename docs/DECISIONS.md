@@ -229,3 +229,27 @@ Final analysis and Linux build passed. The compiled desktop app accepted @riv,
 selected project and location suggestions through the keyboard, saved the resulting
 inline links and both associations, and rendered the project hover card in place.
 The screenshots show the actual autocomplete menu and saved inline hover card.
+
+## Project checklist milestone
+
+The user approved task checklists before image attachments. Schema 6 adds
+ProjectTasks with stable UUID, project FK (cascade), title, completed flag, and
+integer position. Repository reads join projects to enforce world scope; every
+write validates parent ownership and scopes task IDs to the project inside a
+transaction. New positions are allocated in the same transaction to preserve
+insertion order. Task changes update the parent project's updatedAt but do not
+change its status. Rename preserves completion and position.
+
+The shared project reading dialog includes a compact checklist, completion count,
+Add task action, checkbox toggles, task menu edit/delete, and delete confirmation.
+It is available through world projects, location lists and journal mentions.
+Writes disable pending row controls and surface failure without optimistic model
+changes. Task dialogs support Enter and Command/Control+Enter, validation, retained
+text after failure, and dirty discard confirmation. No new package dependency.
+
+Verified: all 37 tests passed and static analysis found no issues. New checks cover
+schema-5 migration preserving journal links, task edits and completion after disk
+reopen, insertion order after deletion, project/world cascade cleanup, invalid/stale
+IDs, world/project ownership, responsive dark mobile/light desktop CRUD, cancel
+and discard, completion toggles, reopening the reader, and deleted-parent save
+failure retaining input. Linux build and macOS verification are reported separately.

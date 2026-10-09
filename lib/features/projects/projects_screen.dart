@@ -7,6 +7,7 @@ import '../locations/location_repository.dart';
 import '../locations/locations_screen.dart';
 import 'project_repository.dart';
 import 'project_editor.dart';
+import 'project_checklist.dart';
 
 Future<void> showProjectDetails(
   BuildContext context, {
@@ -57,6 +58,8 @@ class ProjectDetails extends ConsumerWidget {
                     SelectableText(
                       current.notes.isEmpty ? 'No notes yet.' : current.notes,
                     ),
+                    const SizedBox(height: 24),
+                    ProjectChecklist(worldId: worldId, projectId: id),
                     if (linked != null) ...[
                       const SizedBox(height: 24),
                       Text(
@@ -134,7 +137,7 @@ class _ProjectsScreenState extends ConsumerState<ProjectsScreen> {
       builder: (context) => AlertDialog(
         title: const Text('Delete project?'),
         content: Text(
-          'Permanently delete "${project.name}"? This cannot be undone.',
+          'Permanently delete "${project.name}"? Its checklist will also be deleted. This cannot be undone.',
         ),
         actions: [
           TextButton(
