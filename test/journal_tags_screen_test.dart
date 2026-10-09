@@ -215,7 +215,7 @@ void main() {
     final j = await JournalRepository(db).save(
       worldId: w,
       title: 'Old entry',
-      body: 'Keep my history.',
+      body: 'Keep my history. A normal @ remains.',
       occurredAt: DateTime(2026),
       projectIds: {p},
     );
@@ -235,11 +235,20 @@ void main() {
     final c =
         tester.widget<TextField>(find.byType(TextField).last).controller!
             as MentionController;
-    expect(c.text, 'Keep my history.\n\nRelated: @Old project');
+    expect(
+      c.text,
+      'Keep my history. A normal @ remains.\n\nRelated: @Old project',
+    );
     expect(find.text('No unsaved changes'), findsOneWidget);
     await tester.tap(find.text('Save entry'));
     await tester.pumpAndSettle();
     expect(find.byKey(ValueKey('mention-project-$p')), findsOneWidget);
+    expect(find.text('Old project'), findsOneWidget);
+    expect(find.text('@Old project'), findsNothing);
+    expect(
+      find.textContaining('A normal @ remains.', findRichText: true),
+      findsWidgets,
+    );
     expect(find.byType(ActionChip), findsNothing);
     expect((await db.select(db.journalProjectTags).get()).single.projectId, p);
     await tester.pumpWidget(const SizedBox.shrink());

@@ -45,6 +45,9 @@ class MentionLinkBuilder extends MarkdownElementBuilder {
       return Text(element.textContent, style: style);
     }
     final id = uri.pathSegments.single;
+    final label = element.textContent.startsWith('@')
+        ? element.textContent.substring(1)
+        : element.textContent;
     return Consumer(
       builder: (context, ref, _) {
         final locations =
@@ -63,9 +66,7 @@ class MentionLinkBuilder extends MarkdownElementBuilder {
         final l = location, p = project;
         final available = uri.host == 'location' ? l != null : p != null;
         return RecordPreview(
-          name: uri.host == 'location'
-              ? l?.name ?? element.textContent
-              : p?.name ?? element.textContent,
+          name: uri.host == 'location' ? l?.name ?? label : p?.name ?? label,
           kind: kind,
           summary: available
               ? uri.host == 'location'
@@ -82,7 +83,7 @@ class MentionLinkBuilder extends MarkdownElementBuilder {
                   showDialog<void>(
                     context: context,
                     builder: (context) => AlertDialog(
-                      title: Text(element.textContent),
+                      title: Text(label),
                       content: Text(
                         '$kind is no longer available in this world.',
                       ),
@@ -100,7 +101,7 @@ class MentionLinkBuilder extends MarkdownElementBuilder {
                   showProjectDetails(context, worldId: worldId, id: id);
                 }
               },
-              child: Text(element.textContent, style: style),
+              child: Text(label, style: style),
             ),
           ),
         );

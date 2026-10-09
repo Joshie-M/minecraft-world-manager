@@ -148,7 +148,8 @@ readable highlighted text within your sentence—for example, `Built @River brid
 near @River base`—rather than separate tags. Ordinary email addresses, code samples,
 and unselected @text remain plain text.
 
-Saved notes and **Preview notes** render mentions as inline links. Hover for a mini
+Saved notes and **Preview notes** render mentions as inline links, hiding their
+leading @ marker. Ordinary @ characters remain visible; the editor retains @mentions. Hover for a mini
 card or click/tap to open full details. Cards show current location coordinates,
 dimension and notes, or project status, notes and its linked location. The editor
 keeps link IDs hidden while preserving them in Markdown internally. Record names
