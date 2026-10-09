@@ -63,3 +63,13 @@ Linux release verification exposed incorrect icon glyphs with Flutter's default
 font subsetting. Rebuilding with `--no-tree-shake-icons` restored the icons; use
 that flag for Linux release builds until the SDK issue is resolved. Debug builds
 on the Mac still need the user's visual check.
+
+## macOS-inspired refinement
+
+Supersedes the illustrated-card direction. The library now uses compact world
+rows, a quiet sidebar and toolbar, neutral light/dark surfaces, restrained blue
+accents, Cupertino line icons and platform system typography. Create/edit/delete
+and SQLite persistence remain intact. Added contextual open/edit actions and
+Command/Control keyboard shortcuts for creation and saving. See DESIGN.md for
+shared design tokens and component rules. Eight tests pass. Native macOS visual
+verification remains pending on the user's machine.

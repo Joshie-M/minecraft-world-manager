@@ -7,7 +7,7 @@ An offline Flutter companion for Minecraft. The first milestone supports a world
 
 - Linux release build succeeded.
 - Static analysis passed with no issues.
-- Seven tests passed: disk CRUD/reopen, invalid data handling, UI CRUD, and
+- Eight tests passed: disk CRUD/reopen, invalid data handling, UI CRUD, keyboard shortcuts, and
   narrow/wide layouts in light/dark themes with enlarged text.
 - The compiled desktop app created a world through its UI. After stopping and
   restarting the process, the world appeared again on its dashboard.
@@ -20,8 +20,12 @@ macOS app running locally; the redesigned macOS build awaits local verification.
 
 ![Redesigned dashboard with demonstration worlds](docs/screenshots/dashboard.png)
 
-The illustrated landscapes are decorative placeholders; your saved worlds and
-notes remain local.
+A compact world library with a quiet sidebar and contextual actions. Your saved
+worlds and notes remain local. See [the design system](docs/DESIGN.md) and
+[the editor screenshot](docs/screenshots/editor.png).
+
+Keyboard shortcuts: Command+N (Control+N elsewhere) creates a world;
+Command+Enter / Control+Enter saves the active editor.
 
 ## Cloud development commands
 

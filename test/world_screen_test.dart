@@ -1,5 +1,6 @@
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:minecraft_world_manager/core/database/app_database.dart';
@@ -9,6 +10,30 @@ import 'package:minecraft_world_manager/features/worlds/world_repository.dart';
 import 'package:minecraft_world_manager/features/worlds/world_screen.dart';
 
 void main() {
+  testWidgets('keyboard shortcuts create and save a world', (tester) async {
+    final database = AppDatabase.forTesting(NativeDatabase.memory());
+    addTearDown(database.close);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [databaseProvider.overrideWithValue(database)],
+        child: const WorldManagerApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.metaLeft);
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyN);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.metaLeft);
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextFormField).first, 'Keyboard world');
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.metaLeft);
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.metaLeft);
+    await tester.pumpAndSettle();
+    expect(find.text('Keyboard world'), findsOneWidget);
+    expect(find.text('World saved on this device.'), findsOneWidget);
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pumpAndSettle();
+  });
   for (final width in [390.0, 1280.0]) {
     for (final brightness in Brightness.values) {
       testWidgets('world dashboard at width $width in $brightness', (
@@ -43,7 +68,7 @@ void main() {
         expect(find.text('A world with a longer name'), findsOneWidget);
         expect(find.text('New world'), findsOneWidget);
         expect(
-          find.text('WORLD\nMANAGER'),
+          find.text('World Manager'),
           width >= 900 ? findsOneWidget : findsNothing,
         );
         expect(tester.takeException(), isNull);
