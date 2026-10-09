@@ -1,10 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../app/app_shell.dart';
 import 'entry_editor.dart';
 import 'journal_tags.dart';
+import 'journal_markdown.dart';
 import 'journal_repository.dart';
 import 'journal_screen.dart';
 
@@ -139,12 +139,9 @@ class EntryReader extends ConsumerWidget {
                                 style: theme.textTheme.bodyMedium,
                               )
                             else
-                              MarkdownBody(
+                              JournalMarkdown(
+                                worldId: worldId,
                                 data: entry.body,
-                                selectable: true,
-                                imageBuilder: (_, _, _) => const Text(
-                                  'Image attachments are coming in a later milestone.',
-                                ),
                               ),
                           ],
                         ),

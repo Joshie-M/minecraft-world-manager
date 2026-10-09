@@ -1,13 +1,17 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../app/labeled_field.dart';
 import '../../core/database/app_database.dart';
+import '../../main.dart';
 import 'journal_repository.dart';
 import 'journal_tags.dart';
-import 'package:flutter/foundation.dart';
+import 'mention_controller.dart';
+import 'mention_field.dart';
+import 'journal_markdown.dart';
+import '../locations/location_repository.dart';
+import '../projects/project_repository.dart';
 import 'journal_screen.dart';
 
 class EntryEditor extends ConsumerStatefulWidget {
@@ -27,17 +31,14 @@ class EntryEditor extends ConsumerStatefulWidget {
 class _EntryEditorState extends ConsumerState<EntryEditor> {
   final form = GlobalKey<FormState>();
   late final title = TextEditingController(text: widget.entry?.title ?? '');
-  late final notes = TextEditingController(text: widget.entry?.body ?? '');
+  late final notes = MentionController(widget.entry?.body ?? '');
+  late String initialBody = notes.markdown;
   final notesFocus = FocusNode();
   late DateTime occurredAt =
       widget.entry?.occurredAt.toLocal() ?? DateTime.now();
   late final initialDate = occurredAt;
   bool saving = false, preview = false, allowLeave = false;
   String? error;
-  Set<String> locationIds = {},
-      projectIds = {},
-      initialLocations = {},
-      initialProjects = {};
   bool tagsReady = false;
   String? tagError;
   Future<void> loadTags() async {
@@ -54,31 +55,46 @@ class _EntryEditorState extends ConsumerState<EntryEditor> {
           : await ref.read(
               entryProjectTagsProvider((widget.worldId, id)).future,
             );
-      if (mounted) {
-        setState(() {
-          locationIds = {...locations};
-          projectIds = {...projects};
-          initialLocations = {...locations};
-          initialProjects = {...projects};
-          tagsReady = true;
-          tagError = null;
-        });
+      if (!mounted) return;
+      final savedLocations = await ref.read(
+        locationsProvider(widget.worldId).future,
+      );
+      if (!mounted) return;
+      final savedProjects = await ref.read(
+        projectsProvider(widget.worldId).future,
+      );
+      if (!mounted) return;
+      final legacy = <String>[];
+      for (final l in savedLocations.where(
+        (l) =>
+            locations.contains(l.id) && !notes.ids('location').contains(l.id),
+      )) {
+        legacy.add(mentionMarkdown('@${l.name}', 'location', l.id));
       }
+      for (final p in savedProjects.where(
+        (p) => projects.contains(p.id) && !notes.ids('project').contains(p.id),
+      )) {
+        legacy.add(mentionMarkdown('@${p.name}', 'project', p.id));
+      }
+      if (legacy.isNotEmpty) {
+        notes.setMarkdown(
+          '${notes.markdown}${notes.text.trim().isEmpty ? '' : '\n\n'}Related: ${legacy.join(', ')}',
+        );
+      }
+      setState(() {
+        initialBody = notes.markdown;
+        tagsReady = true;
+        tagError = null;
+      });
     } catch (_) {
       if (mounted) setState(() => tagError = 'Could not load saved tags.');
     }
   }
 
-  void toggle(Set<String> ids, String id) => setState(() {
-    if (!ids.remove(id)) ids.add(id);
-  });
-
   bool get dirty =>
       title.text != (widget.entry?.title ?? '') ||
-      notes.text != (widget.entry?.body ?? '') ||
-      occurredAt != initialDate ||
-      !setEquals(locationIds, initialLocations) ||
-      !setEquals(projectIds, initialProjects);
+      notes.markdown != initialBody ||
+      occurredAt != initialDate;
   @override
   void initState() {
     super.initState();
@@ -140,16 +156,28 @@ class _EntryEditorState extends ConsumerState<EntryEditor> {
       error = null;
     });
     try {
+      // Deleted records keep their inline text, but no longer have associations.
+      final db = ref.read(databaseProvider);
+      final locations = await (db.select(
+        db.locations,
+      )..where((l) => l.worldId.equals(widget.worldId))).get();
+      final projects = await (db.select(
+        db.projects,
+      )..where((p) => p.worldId.equals(widget.worldId))).get();
       await ref
           .read(journalRepositoryProvider)
           .save(
             worldId: widget.worldId,
             id: widget.entry?.id,
             title: title.text,
-            body: notes.text,
+            body: notes.markdown,
             occurredAt: occurredAt,
-            locationIds: locationIds,
-            projectIds: projectIds,
+            locationIds: notes
+                .ids('location')
+                .intersection(locations.map((l) => l.id).toSet()),
+            projectIds: notes
+                .ids('project')
+                .intersection(projects.map((p) => p.id).toSet()),
           );
       await leave(saved: true);
     } catch (_) {
@@ -167,12 +195,16 @@ class _EntryEditorState extends ConsumerState<EntryEditor> {
     final selection = notes.selection;
     final start = selection.isValid ? selection.start : notes.text.length;
     final end = selection.isValid ? selection.end : start;
-    final selected = notes.text.substring(start, end);
+    // Separate boundary insertions preserve mentions when styling a whole link.
     notes.value = TextEditingValue(
-      text: notes.text.replaceRange(start, end, '$prefix$selected$suffix'),
+      text: notes.text.replaceRange(end, end, suffix),
+      selection: TextSelection.collapsed(offset: end),
+    );
+    notes.value = TextEditingValue(
+      text: notes.text.replaceRange(start, start, prefix),
       selection: TextSelection(
         baseOffset: start + prefix.length,
-        extentOffset: start + prefix.length + selected.length,
+        extentOffset: end + prefix.length,
       ),
     );
     notesFocus.requestFocus();
@@ -321,16 +353,7 @@ class _EntryEditorState extends ConsumerState<EntryEditor> {
                               child: Text('$tagError Retry'),
                             )
                           else if (!tagsReady)
-                            const CupertinoActivityIndicator()
-                          else
-                            JournalTagPicker(
-                              worldId: widget.worldId,
-                              locationIds: locationIds,
-                              projectIds: projectIds,
-                              onLocation: (id) => toggle(locationIds, id),
-                              onProject: (id) => toggle(projectIds, id),
-                              enabled: !saving,
-                            ),
+                            const CupertinoActivityIndicator(),
                           const SizedBox(height: 20),
                           Wrap(
                             spacing: 8,
@@ -370,32 +393,25 @@ class _EntryEditorState extends ConsumerState<EntryEditor> {
                           ),
                           const SizedBox(height: 12),
                           if (preview)
-                            MarkdownBody(
+                            JournalMarkdown(
+                              worldId: widget.worldId,
                               data: notes.text.isEmpty
                                   ? '_No notes yet._'
-                                  : notes.text,
-                              selectable: true,
-                              imageBuilder: (_, _, _) => const Text(
-                                'Image attachments are coming in a later milestone.',
-                              ),
+                                  : notes.markdown,
                             )
                           else
                             LabeledField(
                               label: 'Notes',
-                              child: TextField(
+                              child: MentionField(
+                                worldId: widget.worldId,
                                 controller: notes,
                                 focusNode: notesFocus,
-                                enabled: !saving,
-                                minLines: 12,
-                                maxLines: null,
-                                decoration: const InputDecoration(
-                                  hintText: 'What happened in this world?',
-                                ),
+                                enabled: !saving && tagsReady,
                               ),
                             ),
                           const SizedBox(height: 12),
                           Text(
-                            'Markdown: **bold**, *italic*, # heading, and - lists. Save before closing the app.',
+                            'Type @ to mention a project or location. Markdown: **bold**, *italic*, # heading, and - lists. Save before closing the app.',
                             style: theme.textTheme.bodySmall,
                           ),
                         ],

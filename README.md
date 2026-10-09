@@ -7,8 +7,8 @@ notes, saved coordinates, world projects, search, and local SQLite persistence.
 
 - Linux release build succeeded.
 - Static analysis passed with no issues.
-- Twenty-six tests passed: disk CRUD/reopen, invalid data handling, world/journal UI CRUD, keyboard shortcuts,
-  world isolation, migrations, coordinate validation/clipboard copying, project/location relationships, journal tags/hover previews, and responsive light/dark layouts.
+- Thirty-three tests passed: disk CRUD/reopen, invalid data handling, world/journal UI CRUD, keyboard shortcuts,
+  world isolation, migrations, coordinate validation/clipboard copying, project/location relationships, inline @mentions/autocomplete/hover previews, and responsive light/dark layouts.
 - The compiled desktop app created a world through its UI. After stopping and
   restarting the process, the world appeared again on its dashboard. A journal
   entry was also saved through the compiled UI and displayed after restart.
@@ -133,24 +133,34 @@ explicit saving (Command+Enter / Control+Enter); leaving a changed editor asks
 before discarding. Save before quitting—crash-recovery drafts are not implemented.
 Task checklists, materials, images, free-form labels and multiple location links are deferred.
 
-## Journal tags & location projects
+## Inline @mentions & location projects
 
-[Journal hover card](docs/screenshots/journal-tags.png) · [Location project list](docs/screenshots/location-projects.png)
+[Autocomplete menu](docs/screenshots/mention-autocomplete.png) · [Inline hover card](docs/screenshots/journal-tags.png) · [Location project list](docs/screenshots/location-projects.png)
 
-Locations now show **Projects at this location**, including completed projects
-with their status. Click a project in this list to read it. The list follows
-project edits and location changes automatically.
+Locations show **Projects at this location**, including completed projects with
+status. Click a project to read it. This list follows project edits and location
+changes automatically.
 
-When creating or editing a journal entry, use **Tag locations & projects** to
-select any number of saved records from that world, then **Save entry**. Click a
-selected tag again to remove it. These are links to records, not arbitrary text
-labels or inline Markdown mentions. Saved entries show compact tags: hover on
-desktop for a mini card, or click/tap for full details. Previews include location
-coordinates/dimension/notes or project status/notes and its linked location.
-Hover previews are also available while choosing tags in the editor.
+In journal notes, type `@` to see this world's projects and locations. Continue
+typing to filter by name, then click a suggestion or use Up/Down and Enter/Tab.
+Escape dismisses suggestions without closing your draft. Mentions appear as
+readable highlighted text within your sentence—for example, `Built @River bridge
+near @River base`—rather than separate tags. Ordinary email addresses, code samples,
+and unselected @text remain plain text.
 
-Schema version 5 adds tag association tables without replacing existing records.
-Entry content and tag changes save together. Renaming or editing a tagged record
-updates its preview; deleting it removes its tags while preserving the journal
-text. If a record disappears during editing, remove its unavailable tag before
-saving. Tags participate in unsaved-change confirmation. No new package required.
+Saved notes and **Preview notes** render mentions as inline links. Hover for a mini
+card or click/tap to open full details. Cards show current location coordinates,
+dimension and notes, or project status, notes and its linked location. The editor
+keeps link IDs hidden while preserving them in Markdown internally. Record names
+can repeat or change without redirecting a link. Editing inside a mention turns
+that edited text into plain text; deleting it removes its association on save.
+Markdown formatting around a complete mention preserves the link.
+
+No database migration is needed; schema 5 still stores record associations.
+Existing separate tags remain readable until editing: the editor adds them as
+inline mentions on a `Related:` line, which you can move into your text or remove.
+They become inline links when you save. Journal text and associations save together.
+Deleted record mentions retain their text and show an unavailable message; editing
+and saving such an entry keeps its notes without recreating removed associations.
+The existing Markdown parser package is now a direct dependency at its locked
+version, with no package version updates.

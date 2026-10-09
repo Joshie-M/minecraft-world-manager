@@ -192,3 +192,40 @@ seeded separately for the visual check; the compiled reading view displayed thei
 hover card and the location's project list. Screenshots are committed under docs.
 Headless GTK startup required GDK_BACKEND=x11 with Xvfb; the README records that
 runtime choice. No real platform-specific macOS build was run in the cloud.
+
+## Inline @mention refinement
+
+User clarified that references should live within journal sentences with @autocomplete,
+rather than separate chips. The separate picker is removed. MentionController keeps
+visible @labels and tracked UTF-16 ranges while serializing stable IDs as escaped
+Markdown links (world-manager://location/<id> and .../project/<id>). Changes before
+links shift their ranges; edits within a link unbind it; deleting a link removes its
+association on save. Boundary Markdown formatting preserves whole mentions.
+
+Autocomplete is anchored at the caret in an overlay with world-scoped, case-insensitive
+name filtering, explicit kind/detail labels, mouse/touch selection, Up/Down navigation,
+Enter/Tab selection and Escape dismissal. Emails and code samples remain literal.
+Selection and IME composition do not trigger suggestions. Reader and editor preview
+share a custom Markdown link builder and live record widgets, with highlighted inline
+links, existing hover cards and detail dialogs. Markdown's builder cache does not
+observe record edits, so the inline record widget subscribes directly to live streams.
+External links remain display-only and remote images remain disabled.
+
+No schema change. Existing chip associations are converted on editor hydration into
+inline links appended on a Related: line; only explicit save persists the conversion.
+Unedited legacy entries remain readable. The normal save updates body and associations
+atomically using the existing repository. Deleted mentions keep their text and show
+unavailable details; saving filters missing associations without removing journal prose.
+markdown 7.3.1 was already installed transitively and is now declared directly for the
+custom builder's typed AST interface; its version and checksum are unchanged.
+
+Validation covers readable-label round trips, escaping, repeated names, range movement,
+deletions, code samples, Markdown boundaries, desktop light/mobile dark autocomplete,
+email/code exclusions, no matches, Escape, keyboard and tap insertion, preview/read
+hover navigation, reverse project lists, editing saved mentions, deleted-record handling,
+and legacy-link conversion. The full suite has 33 tests. macOS verification remains local.
+
+Final analysis and Linux build passed. The compiled desktop app accepted @riv,
+selected project and location suggestions through the keyboard, saved the resulting
+inline links and both associations, and rendered the project hover card in place.
+The screenshots show the actual autocomplete menu and saved inline hover card.

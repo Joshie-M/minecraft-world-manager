@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../main.dart';
 import '../../core/database/app_database.dart';
+import 'journal_repository.dart';
+import 'mention_controller.dart';
 import '../locations/location_repository.dart';
 import '../locations/locations_screen.dart';
 import '../projects/project_repository.dart';
@@ -170,11 +172,24 @@ class JournalTags extends ConsumerWidget {
     ].any((v) => v.isLoading)) {
       return const CupertinoActivityIndicator();
     }
+    final entries =
+        ref.watch(journalProvider(worldId)).asData?.value ?? <JournalEntry>[];
+    final body =
+        entries.where((e) => e.id == entryId).map((e) => e.body).firstOrNull ??
+        '';
+    final controller = MentionController(body);
+    final inlineLocations = controller.ids('location'),
+        inlineProjects = controller.ids('project');
+    controller.dispose();
     final linkedLocations = locations.requireValue.where(
-      (l) => locationIds.requireValue.contains(l.id),
+      (l) =>
+          locationIds.requireValue.contains(l.id) &&
+          !inlineLocations.contains(l.id),
     );
     final linkedProjects = projects.requireValue.where(
-      (p) => projectIds.requireValue.contains(p.id),
+      (p) =>
+          projectIds.requireValue.contains(p.id) &&
+          !inlineProjects.contains(p.id),
     );
     if (linkedLocations.isEmpty && linkedProjects.isEmpty) {
       return const SizedBox.shrink();
@@ -216,109 +231,6 @@ class JournalTags extends ConsumerWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-class JournalTagPicker extends ConsumerWidget {
-  const JournalTagPicker({
-    super.key,
-    required this.worldId,
-    required this.locationIds,
-    required this.projectIds,
-    required this.onLocation,
-    required this.onProject,
-    required this.enabled,
-  });
-  final String worldId;
-  final Set<String> locationIds, projectIds;
-  final void Function(String) onLocation, onProject;
-  final bool enabled;
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final locations = ref.watch(locationsProvider(worldId));
-    final projects = ref.watch(projectsProvider(worldId));
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Tag locations & projects',
-          style: Theme.of(context).textTheme.labelMedium,
-        ),
-        const SizedBox(height: 8),
-        if (locations.hasError || projects.hasError)
-          TextButton(
-            onPressed: () {
-              ref.invalidate(locationsProvider(worldId));
-              ref.invalidate(projectsProvider(worldId));
-            },
-            child: const Text('Retry loading available tags'),
-          ),
-        if (locations.isLoading || projects.isLoading)
-          const CupertinoActivityIndicator(),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: [
-            for (final l in locations.asData?.value ?? <Location>[])
-              RecordPreview(
-                name: l.name,
-                kind: 'Location',
-                summary: '${l.dimension} · ${coordinateText(l)}',
-                notes: l.notes,
-                child: FilterChip(
-                  key: ValueKey('pick-location-${l.id}'),
-                  avatar: const Icon(CupertinoIcons.map_pin, size: 14),
-                  label: Text(l.name),
-                  selected: locationIds.contains(l.id),
-                  onSelected: enabled ? (_) => onLocation(l.id) : null,
-                ),
-              ),
-            for (final p in projects.asData?.value ?? <Project>[])
-              RecordPreview(
-                name: p.name,
-                kind: 'Project',
-                summary: projectSummary(
-                  p,
-                  locations.asData?.value ?? <Location>[],
-                ),
-                notes: p.notes,
-                child: FilterChip(
-                  key: ValueKey('pick-project-${p.id}'),
-                  avatar: const Icon(CupertinoIcons.hammer, size: 14),
-                  label: Text(p.name),
-                  selected: projectIds.contains(p.id),
-                  onSelected: enabled ? (_) => onProject(p.id) : null,
-                ),
-              ),
-            for (final id in locationIds.where(
-              (id) =>
-                  locations.hasValue &&
-                  !locations.requireValue.any((l) => l.id == id),
-            ))
-              InputChip(
-                label: const Text('Unavailable location'),
-                onDeleted: enabled ? () => onLocation(id) : null,
-              ),
-            for (final id in projectIds.where(
-              (id) =>
-                  projects.hasValue &&
-                  !projects.requireValue.any((p) => p.id == id),
-            ))
-              InputChip(
-                label: const Text('Unavailable project'),
-                onDeleted: enabled ? () => onProject(id) : null,
-              ),
-          ],
-        ),
-        if (locations.hasValue &&
-            projects.hasValue &&
-            locations.requireValue.isEmpty &&
-            projects.requireValue.isEmpty)
-          const Text(
-            'Save a location or project in this world to tag it here.',
-          ),
-      ],
     );
   }
 }
