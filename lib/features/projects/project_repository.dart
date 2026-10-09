@@ -31,6 +31,7 @@ class ProjectRepository {
     String notes = '',
     String status = 'Planned',
     String? locationId,
+    List<String> initialTasks = const [],
   }) async {
     final cleanName = name.trim();
     if (cleanName.isEmpty || cleanName.length > 100) {
@@ -38,6 +39,13 @@ class ProjectRepository {
     }
     if (!projectStatuses.contains(status)) {
       throw ArgumentError('Choose a project status.');
+    }
+    final tasks = initialTasks.map((title) => title.trim()).toList();
+    if (tasks.any((title) => title.isEmpty || title.length > 200)) {
+      throw ArgumentError('Enter task names between 1 and 200 characters.');
+    }
+    if (id != null && tasks.isNotEmpty) {
+      throw ArgumentError('Initial tasks are only supported for new projects.');
     }
     return database.transaction(() async {
       if (locationId != null) {
@@ -84,6 +92,18 @@ class ProjectRepository {
               updatedAt: now,
             ),
           );
+      for (var index = 0; index < tasks.length; index++) {
+        await database
+            .into(database.projectTasks)
+            .insert(
+              ProjectTasksCompanion.insert(
+                id: const Uuid().v4(),
+                projectId: newId,
+                title: tasks[index],
+                position: index,
+              ),
+            );
+      }
       return newId;
     });
   }

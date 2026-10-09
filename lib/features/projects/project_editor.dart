@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../app/labeled_field.dart';
@@ -30,13 +31,15 @@ class _ProjectEditorState extends ConsumerState<ProjectEditor> {
   late final notes = TextEditingController(text: widget.project?.notes ?? '');
   late String status = widget.project?.status ?? 'Planned';
   late String? locationId = widget.project?.locationId;
+  final tasks = <TextEditingController>[];
   bool saving = false, allowLeave = false;
   String? error;
   bool get dirty =>
       name.text != (widget.project?.name ?? '') ||
       notes.text != (widget.project?.notes ?? '') ||
       status != (widget.project?.status ?? 'Planned') ||
-      locationId != widget.project?.locationId;
+      locationId != widget.project?.locationId ||
+      tasks.isNotEmpty;
   @override
   void initState() {
     super.initState();
@@ -50,6 +53,9 @@ class _ProjectEditorState extends ConsumerState<ProjectEditor> {
   void dispose() {
     for (final c in [name, notes]) {
       c.dispose();
+    }
+    for (final task in tasks) {
+      task.dispose();
     }
     super.dispose();
   }
@@ -100,6 +106,7 @@ class _ProjectEditorState extends ConsumerState<ProjectEditor> {
             status: status,
             locationId: locationId,
             notes: notes.text,
+            initialTasks: tasks.map((task) => task.text).toList(),
           );
       if (mounted) await leave(true);
     } catch (_) {
@@ -246,6 +253,66 @@ class _ProjectEditorState extends ConsumerState<ProjectEditor> {
                       maxLines: 4,
                     ),
                   ),
+                  if (widget.project == null) ...[
+                    const SizedBox(height: 20),
+                    Row(
+                      children: [
+                        const Expanded(child: Text('Checklist (optional)')),
+                        TextButton.icon(
+                          onPressed: saving
+                              ? null
+                              : () => setState(() {
+                                  final task = TextEditingController();
+                                  task.addListener(changed);
+                                  tasks.add(task);
+                                }),
+                          icon: const Icon(CupertinoIcons.plus, size: 16),
+                          label: const Text('Add task'),
+                        ),
+                      ],
+                    ),
+                    for (final task in tasks)
+                      Padding(
+                        key: ObjectKey(task),
+                        padding: const EdgeInsets.only(top: 8),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: TextFormField(
+                                controller: task,
+                                enabled: !saving,
+                                maxLength: 200,
+                                decoration: const InputDecoration(
+                                  hintText: 'Task name',
+                                ),
+                                validator: (value) =>
+                                    value == null || value.trim().isEmpty
+                                    ? 'Give this task a name.'
+                                    : null,
+                              ),
+                            ),
+                            IconButton(
+                              tooltip: 'Remove task',
+                              onPressed: saving
+                                  ? null
+                                  : () {
+                                      setState(() => tasks.remove(task));
+                                      // Dispose after the field has detached its listeners.
+                                      WidgetsBinding.instance
+                                          .addPostFrameCallback(
+                                            (_) => task.dispose(),
+                                          );
+                                    },
+                              icon: const Icon(
+                                CupertinoIcons.minus_circle,
+                                size: 18,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                  ],
                   if (error != null)
                     Padding(
                       padding: const EdgeInsets.only(top: 12),

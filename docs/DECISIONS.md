@@ -253,3 +253,24 @@ reopen, insertion order after deletion, project/world cascade cleanup, invalid/s
 IDs, world/project ownership, responsive dark mobile/light desktop CRUD, cancel
 and discard, completion toggles, reopening the reader, and deleted-parent save
 failure retaining input. Linux build and macOS verification are reported separately.
+
+## World search and project creation checklists
+
+World search combines the existing world-scoped journal, location, and project
+streams and reuses their reading views. It uses literal, case-insensitive word
+matching rather than SQL wildcards and excludes Markdown link destinations from
+searchable text. Search is local and grouped by content type; no index or schema
+change is required at this scale. Loading and partial failures remain visible,
+with retry and clear controls. The search field supports Cmd/Ctrl+F.
+
+New-project checklist rows are drafts owned by the project editor. Validation
+requires nonempty task names up to 200 characters. ProjectRepository.save accepts
+initial tasks only for creation and inserts them in the same transaction as the
+project, retaining order and starting unchecked. Existing project edits cannot
+replace or duplicate tasks. The editor's dirty guard includes draft tasks and
+save failures retain all input.
+
+Six added tests cover matching semantics, world isolation, live results, reading
+navigation, narrow dark and wide light layouts, draft row validation/removal,
+and atomic project/task persistence. Mac runtime verification remains a user
+check after pulling the update.

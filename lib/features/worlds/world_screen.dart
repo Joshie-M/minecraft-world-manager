@@ -12,6 +12,7 @@ import '../journal/journal_screen.dart';
 import '../journal/entry_reader.dart';
 import '../projects/projects_screen.dart';
 import '../locations/locations_screen.dart';
+import '../search/world_search.dart';
 
 class WorldScreen extends ConsumerWidget {
   const WorldScreen({super.key});
@@ -299,6 +300,19 @@ class WorldOverview extends ConsumerWidget {
                       spacing: 12,
                       runSpacing: 12,
                       children: [
+                        OutlinedButton.icon(
+                          onPressed: () => Navigator.push(
+                            context,
+                            MaterialPageRoute<void>(
+                              builder: (_) => WorldSearch(
+                                worldId: current.id,
+                                worldName: current.name,
+                              ),
+                            ),
+                          ),
+                          icon: const Icon(CupertinoIcons.search, size: 16),
+                          label: const Text('Search world'),
+                        ),
                         OutlinedButton.icon(
                           onPressed: () =>
                               showWorldEditor(context, ref, world: current),

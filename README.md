@@ -7,7 +7,7 @@ notes, saved coordinates, world projects, search, and local SQLite persistence.
 
 - Linux release build succeeded.
 - Static analysis passed with no issues.
-- Thirty-seven tests passed: disk CRUD/reopen, invalid data handling, world/journal UI CRUD, keyboard shortcuts,
+- Forty-three tests passed: disk CRUD/reopen, invalid data handling, world/journal UI CRUD, keyboard shortcuts,
   world isolation, migrations, coordinate validation/clipboard copying, project/location relationships, inline @mentions/autocomplete/hover previews, project checklists, and responsive light/dark layouts.
 - The compiled desktop app created a world through its UI. After stopping and
   restarting the process, the world appeared again on its dashboard. A journal
@@ -180,3 +180,19 @@ Schema version 6 adds tasks and preserves existing worlds, journals, locations,
 projects and mention links. Deleting a project or world also removes its tasks.
 Task editor text is retained after save errors; leaving a changed task asks before
 discarding. Reordering, materials and subtasks remain future additions.
+
+## Search this world
+
+Open a world and choose **Search world** to find journal entries, saved locations,
+and projects together. Results are grouped by type and open in their reading
+views. Search matches every typed word, regardless of order and case, across
+names/titles and notes/body text; locations also match dimension and coordinates,
+and projects match status. Stored journal link URLs are excluded. Results stay
+within the current world and update as saved records change. Use ⌘F / Ctrl+F
+while in search to focus the field, or Clear search to start again.
+
+When creating a project, choose **Add task** under **Checklist (optional)** to
+prepare its initial checklist. Draft tasks can be edited or removed before saving.
+The project and tasks save together; canceling discards both, and a failed save
+keeps your draft in the form. Existing projects keep their checklist controls in
+the project reading view. No database migration or dependency changes are needed.
