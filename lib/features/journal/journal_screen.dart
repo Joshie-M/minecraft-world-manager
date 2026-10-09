@@ -5,6 +5,7 @@ import '../../app/app_shell.dart';
 import '../../core/database/app_database.dart';
 import 'journal_repository.dart';
 import 'entry_editor.dart';
+import 'entry_reader.dart';
 
 String entryDate(DateTime date) {
   final d = date.toLocal();
@@ -160,7 +161,15 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
                             overflow: TextOverflow.ellipsis,
                           ),
                           subtitle: Text(entryDate(entry.occurredAt)),
-                          onTap: () => edit(entry),
+                          onTap: () => Navigator.of(context).push(
+                            MaterialPageRoute<void>(
+                              builder: (_) => EntryReader(
+                                worldId: widget.worldId,
+                                worldName: widget.worldName,
+                                entryId: entry.id,
+                              ),
+                            ),
+                          ),
                           trailing: PopupMenuButton<String>(
                             tooltip: 'Entry actions',
                             icon: const Icon(CupertinoIcons.ellipsis),

@@ -61,6 +61,13 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.text('Cave expedition'));
       await tester.pumpAndSettle();
+      expect(find.byType(TextFormField), findsNothing);
+      expect(
+        find.textContaining('Found diamonds', findRichText: true),
+        findsWidgets,
+      );
+      await tester.tap(find.text('Edit entry'));
+      await tester.pumpAndSettle();
       await tester.enterText(find.byType(TextFormField), 'Diamond expedition');
       await tester.tap(find.byTooltip('Close editor'));
       await tester.pumpAndSettle();
@@ -70,6 +77,23 @@ void main() {
       await tester.tap(find.text('Save entry'));
       await tester.pumpAndSettle();
       expect(find.text('Diamond expedition'), findsOneWidget);
+      await tester.tap(find.byTooltip('Back to entries'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip('Back to world'));
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.text('Diamond expedition'));
+      await tester.tap(find.text('Diamond expedition'));
+      await tester.pumpAndSettle();
+      expect(find.byType(TextFormField), findsNothing);
+      expect(
+        find.textContaining('Found diamonds', findRichText: true),
+        findsWidgets,
+      );
+      await tester.tap(find.byTooltip('Back to entries'));
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.text('Open journal'));
+      await tester.tap(find.text('Open journal'));
+      await tester.pumpAndSettle();
       await tester.tap(find.byTooltip('Entry actions'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Delete entry'));

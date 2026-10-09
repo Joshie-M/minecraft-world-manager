@@ -9,6 +9,7 @@ import '../../app/labeled_field.dart';
 import '../../core/database/app_database.dart';
 import '../../main.dart';
 import '../journal/journal_screen.dart';
+import '../journal/entry_reader.dart';
 
 class WorldScreen extends ConsumerWidget {
   const WorldScreen({super.key});
@@ -358,6 +359,11 @@ class WorldOverview extends ConsumerWidget {
                           ),
                         ),
                       ],
+                    ),
+                    const SizedBox(height: 24),
+                    WorldJournalSection(
+                      worldId: current.id,
+                      worldName: current.name,
                     ),
                   ],
                 ),

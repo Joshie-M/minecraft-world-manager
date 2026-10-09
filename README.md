@@ -85,7 +85,9 @@ Open a world, choose **Open journal**, then **New entry**. Add a title, notes an
 an optional adjusted date/time. Use the bold/italic/list buttons or Markdown,
 then **Preview notes** to read the formatted result. **Save entry** (Command+Enter
 or Control+Enter) writes locally and returns to the timeline. Search matches title
-or note text without mixing worlds. The entry menu provides edit/delete actions.
+or note text without mixing worlds. Click a saved entry to read its formatted notes. Choose **Edit entry** when you
+want to change it; the entry menu also provides edit/delete actions. The world
+overview shows its three most recent entries, which open directly in reading view.
 
 Schema version 2 adds journal entries automatically and preserves existing worlds.
 Deleting a world now deletes its journal entries after confirmation. Editing an

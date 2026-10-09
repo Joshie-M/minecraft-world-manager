@@ -95,3 +95,13 @@ Journal validation: 13 tests passed, analysis found no issues, and the Linux
 release build succeeded. The compiled UI migrated a version-1 demo database,
 preserved three worlds, saved a Markdown entry, rendered its bold text and
 displayed the entry after process restart. macOS journal validation remains local.
+
+## Journal navigation correction
+
+User reported successful macOS saving but entry clicks unexpectedly opened the
+editor. Saved entries now open a dedicated reading view with formatted Markdown,
+date and explicit Edit entry action. The reader follows the live world-scoped
+stream so saved edits appear immediately. World overviews show the three most
+recent entries with direct reading links; Open journal retains the full searchable
+timeline. No schema changes. Responsive journal flow tests now verify reading
+from both the timeline and overview, explicit editing and return navigation.
