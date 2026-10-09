@@ -10,6 +10,7 @@ import '../../core/database/app_database.dart';
 import '../../main.dart';
 import '../journal/journal_screen.dart';
 import '../journal/entry_reader.dart';
+import '../projects/projects_screen.dart';
 import '../locations/locations_screen.dart';
 
 class WorldScreen extends ConsumerWidget {
@@ -311,7 +312,7 @@ class WorldOverview extends ConsumerWidget {
                               builder: (context) => AlertDialog(
                                 title: const Text('Delete world?'),
                                 content: Text(
-                                  'Permanently delete "${current.name}" and its journal entries and saved locations? This cannot be undone.',
+                                  'Permanently delete "${current.name}" and its journal entries, saved locations, and projects? This cannot be undone.',
                                 ),
                                 actions: [
                                   TextButton(
@@ -360,6 +361,11 @@ class WorldOverview extends ConsumerWidget {
                           ),
                         ),
                       ],
+                    ),
+                    const SizedBox(height: 24),
+                    WorldProjectsSection(
+                      worldId: current.id,
+                      worldName: current.name,
                     ),
                     const SizedBox(height: 24),
                     WorldLocationsSection(

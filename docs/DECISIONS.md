@@ -127,3 +127,31 @@ existing demo database, preserved worlds/journal data, saved a location and copi
 its exact coordinates through the real system clipboard. macOS location verification remains
 on the user's machine. Future work: images, then tags/categories/favorites and
 optional portal travel planning. No coordinate conversion is applied to copying.
+
+## Projects milestone
+
+The user confirmed saved locations working on macOS and approved world projects.
+Schema version 4 adds Projects: UUID, world ID, name, plain-text notes, one of
+Planned/In progress/Complete, optional location ID, and creation/update timestamps.
+World deletion cascades; location deletion sets the project link to null while
+preserving its notes. Repository writes validate that links belong to the same
+world within a transaction, and updates/deletes require both project and world IDs.
+
+The compact list uses literal case-insensitive name/note search, status filtering,
+and most-recent-update ordering. Saved projects open a live reading dialog with an
+explicit editor action and coordinate copying for their current linked location.
+Editors support explicit save, Command/Control+Enter, unsaved-discard confirmation,
+and retained input on save errors. World overviews expose the latest three projects.
+No new dependency. Materials/checklists and images are later features.
+
+Verified: analysis passed, all 22 tests passed, Linux release build succeeded.
+A schema-3 disk fixture verifies preservation of worlds/journal/locations, project
+edits across reopen, and unlinking on location deletion. Responsive project UI
+flows cover reading, editing, filtering, discard, and delete confirmation in mobile
+dark and desktop light layouts. Older overview UI tests now allow save notifications
+to clear and check persisted world data after cancellation, since extra sections
+change which rows are visible. The compiled app migrated the isolated demo database
+and preserved three worlds, one journal entry and one location. A separately seeded
+demo project rendered its notes and linked coordinates in the compiled reading UI.
+Synthetic keyboard input did not reach the fields in this headless session; compiled
+UI creation was not verified. macOS project validation remains on the user's machine.

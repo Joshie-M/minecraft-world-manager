@@ -48,13 +48,31 @@ class Locations extends Table {
   Set<Column> get primaryKey => {id};
 }
 
-@DriftDatabase(tables: [Worlds, JournalEntries, Locations])
+class Projects extends Table {
+  TextColumn get id => text()();
+  TextColumn get worldId =>
+      text().references(Worlds, #id, onDelete: KeyAction.cascade)();
+  TextColumn get name => text().withLength(min: 1, max: 100)();
+  TextColumn get notes => text().withDefault(const Constant(''))();
+  TextColumn get status => text()();
+  TextColumn get locationId => text().nullable().references(
+    Locations,
+    #id,
+    onDelete: KeyAction.setNull,
+  )();
+  DateTimeColumn get createdAt => dateTime()();
+  DateTimeColumn get updatedAt => dateTime()();
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+@DriftDatabase(tables: [Worlds, JournalEntries, Locations, Projects])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -62,6 +80,7 @@ class AppDatabase extends _$AppDatabase {
     onUpgrade: (m, from, to) async {
       if (from < 2) await m.createTable(journalEntries);
       if (from < 3) await m.createTable(locations);
+      if (from < 4) await m.createTable(projects);
     },
     beforeOpen: (_) async => customStatement('PRAGMA foreign_keys = ON'),
   );

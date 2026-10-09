@@ -1,21 +1,21 @@
 # Minecraft World Manager
 
 An offline Flutter companion for Minecraft. The app supports world management and world-scoped journals with Markdown
-notes, saved coordinates, search, and local SQLite persistence.
+notes, saved coordinates, world projects, search, and local SQLite persistence.
 
 ## Verified in this cloud environment
 
 - Linux release build succeeded.
 - Static analysis passed with no issues.
-- Eighteen tests passed: disk CRUD/reopen, invalid data handling, world/journal UI CRUD, keyboard shortcuts,
-  world isolation, migrations, coordinate validation/clipboard copying, and responsive light/dark layouts.
+- Twenty-two tests passed: disk CRUD/reopen, invalid data handling, world/journal UI CRUD, keyboard shortcuts,
+  world isolation, migrations, coordinate validation/clipboard copying, project/location relationships, and responsive light/dark layouts.
 - The compiled desktop app created a world through its UI. After stopping and
   restarting the process, the world appeared again on its dashboard. A journal
   entry was also saved through the compiled UI and displayed after restart.
 
 Android, iOS, macOS and Windows runners are generated but those platforms have
-not been built or tested in this cloud environment. The user reported the original
-macOS app running locally; the redesigned macOS build awaits local verification. This covers worlds and journals, not the full MVP.
+not been built or tested in this cloud environment. The user confirmed worlds, journals and saved locations working on macOS.
+Projects still need local macOS verification. This is not the full MVP.
 
 ## Design preview
 
@@ -114,3 +114,20 @@ a world also removes its owned locations after confirmation. Coordinates accept
 32-bit signed decimal integers rather than imposing edition-specific world limits.
 Unsaved editor changes require confirmation before discarding. Tags, categories,
 favorites, images and an optional Nether travel helper can follow later.
+
+## Projects
+
+Open a world → **Open projects** → **New project**. Give the project a name,
+optional plain-text notes, and a status: Planned, In progress, or Complete. You
+can link one saved location from the same world; its current coordinates appear
+in the reading view with a copy action. Click a project to read it, then choose
+**Edit project** to make changes. The actions menu offers edit/delete. Search
+matches names and notes, and the status filter narrows the list. Projects are
+ordered by latest update; the world overview shows the latest three.
+
+Schema version 4 adds projects while preserving worlds, journals and locations.
+Deleting a linked location removes the link and keeps the project and notes.
+Deleting a world also deletes its projects after confirmation. Changes require
+explicit saving (Command+Enter / Control+Enter); leaving a changed editor asks
+before discarding. Save before quitting—crash-recovery drafts are not implemented.
+Task checklists, materials, images, tags and multiple location links are deferred.

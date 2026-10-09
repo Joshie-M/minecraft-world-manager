@@ -112,7 +112,10 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Cancel'));
     await tester.pumpAndSettle();
-    expect(find.text('Home base'), findsWidgets);
+    expect(
+      (await database.select(database.worlds).get()).single.name,
+      'Home base',
+    );
     await tester.tap(find.text('Delete world'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Delete'));

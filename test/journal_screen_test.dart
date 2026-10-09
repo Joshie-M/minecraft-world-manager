@@ -81,7 +81,11 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.byTooltip('Back to world'));
       await tester.pumpAndSettle();
+      // Let the save notification clear before tapping a low overview row.
+      await tester.pump(const Duration(seconds: 5));
+      await tester.pumpAndSettle();
       await tester.ensureVisible(find.text('Diamond expedition'));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Diamond expedition'));
       await tester.pumpAndSettle();
       expect(find.byType(TextFormField), findsNothing);
