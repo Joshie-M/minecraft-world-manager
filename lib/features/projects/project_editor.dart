@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../app/labeled_field.dart';
 import '../../core/database/app_database.dart';
 import 'project_repository.dart';
+import 'task_drag_list.dart';
 import '../locations/location_repository.dart';
 
 Future<bool?> showProjectEditor(
@@ -271,75 +272,96 @@ class _ProjectEditorState extends ConsumerState<ProjectEditor> {
                         ),
                       ],
                     ),
-                    for (final task in tasks)
-                      Padding(
-                        key: ObjectKey(task),
-                        padding: const EdgeInsets.only(top: 8),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(
-                              child: TextFormField(
-                                controller: task,
-                                enabled: !saving,
-                                maxLength: 200,
-                                decoration: const InputDecoration(
-                                  hintText: 'Task name',
+                    TaskDragList(
+                      onReorder: (oldIndex, newIndex) {
+                        if (saving) return;
+                        setState(
+                          () =>
+                              tasks.insert(newIndex, tasks.removeAt(oldIndex)),
+                        );
+                      },
+                      children: [
+                        for (final task in tasks)
+                          Padding(
+                            key: ObjectKey(task),
+                            padding: const EdgeInsets.only(top: 8),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                TaskDragHandle(
+                                  key: ObjectKey(task),
+                                  index: tasks.indexOf(task),
+                                  enabled: !saving,
                                 ),
-                                validator: (value) =>
-                                    value == null || value.trim().isEmpty
-                                    ? 'Give this task a name.'
-                                    : null,
-                              ),
-                            ),
-                            PopupMenuButton<String>(
-                              tooltip: 'Task order',
-                              enabled: !saving,
-                              icon: const Icon(
-                                CupertinoIcons.arrow_up_arrow_down,
-                                size: 18,
-                              ),
-                              itemBuilder: (_) => [
-                                PopupMenuItem(
-                                  value: 'up',
-                                  enabled: tasks.indexOf(task) > 0,
-                                  child: const Text('Move up'),
+                                Expanded(
+                                  child: TextFormField(
+                                    controller: task,
+                                    enabled: !saving,
+                                    maxLength: 200,
+                                    decoration: const InputDecoration(
+                                      hintText: 'Task name',
+                                    ),
+                                    validator: (value) =>
+                                        value == null || value.trim().isEmpty
+                                        ? 'Give this task a name.'
+                                        : null,
+                                  ),
                                 ),
-                                PopupMenuItem(
-                                  value: 'down',
-                                  enabled:
-                                      tasks.indexOf(task) < tasks.length - 1,
-                                  child: const Text('Move down'),
+                                PopupMenuButton<String>(
+                                  tooltip: 'Task order',
+                                  enabled: !saving,
+                                  icon: const Icon(
+                                    CupertinoIcons.arrow_up_arrow_down,
+                                    size: 18,
+                                  ),
+                                  itemBuilder: (_) => [
+                                    PopupMenuItem(
+                                      value: 'up',
+                                      enabled: tasks.indexOf(task) > 0,
+                                      child: const Text('Move up'),
+                                    ),
+                                    PopupMenuItem(
+                                      value: 'down',
+                                      enabled:
+                                          tasks.indexOf(task) <
+                                          tasks.length - 1,
+                                      child: const Text('Move down'),
+                                    ),
+                                  ],
+                                  onSelected: (value) => setState(() {
+                                    final index = tasks.indexOf(task);
+                                    final target =
+                                        index + (value == 'up' ? -1 : 1);
+                                    if (target >= 0 && target < tasks.length) {
+                                      tasks.insert(
+                                        target,
+                                        tasks.removeAt(index),
+                                      );
+                                    }
+                                  }),
+                                ),
+                                IconButton(
+                                  tooltip: 'Remove task',
+                                  onPressed: saving
+                                      ? null
+                                      : () {
+                                          setState(() => tasks.remove(task));
+                                          // Dispose after the field has detached its listeners.
+                                          WidgetsBinding.instance
+                                              .addPostFrameCallback(
+                                                (_) => task.dispose(),
+                                              );
+                                        },
+                                  icon: const Icon(
+                                    CupertinoIcons.minus_circle,
+                                    size: 18,
+                                  ),
                                 ),
                               ],
-                              onSelected: (value) => setState(() {
-                                final index = tasks.indexOf(task);
-                                final target = index + (value == 'up' ? -1 : 1);
-                                if (target >= 0 && target < tasks.length) {
-                                  tasks.insert(target, tasks.removeAt(index));
-                                }
-                              }),
                             ),
-                            IconButton(
-                              tooltip: 'Remove task',
-                              onPressed: saving
-                                  ? null
-                                  : () {
-                                      setState(() => tasks.remove(task));
-                                      // Dispose after the field has detached its listeners.
-                                      WidgetsBinding.instance
-                                          .addPostFrameCallback(
-                                            (_) => task.dispose(),
-                                          );
-                                    },
-                              icon: const Icon(
-                                CupertinoIcons.minus_circle,
-                                size: 18,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                          ),
+                      ],
+                    ),
                   ],
                   if (error != null)
                     Padding(

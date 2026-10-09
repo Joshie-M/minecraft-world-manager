@@ -10,6 +10,7 @@ import 'package:minecraft_world_manager/main.dart';
 import 'package:minecraft_world_manager/features/projects/project_repository.dart';
 import 'package:minecraft_world_manager/features/projects/task_repository.dart';
 import 'package:minecraft_world_manager/features/projects/projects_screen.dart';
+import 'package:minecraft_world_manager/features/projects/task_drag_list.dart';
 import 'package:minecraft_world_manager/features/worlds/world_repository.dart';
 import 'package:minecraft_world_manager/features/backup/backup_repository.dart';
 
@@ -123,7 +124,177 @@ void main() {
     },
   );
 
+  test(
+    'drag reorder rejects stale, duplicate and foreign task snapshots',
+    () async {
+      final db = AppDatabase.forTesting(NativeDatabase.memory());
+      addTearDown(db.close);
+      final world = await WorldRepository(
+        db,
+      ).save(name: 'Home', edition: 'Java');
+      final p = await ProjectRepository(db).save(
+        worldId: world,
+        name: 'Bridge',
+        initialTasks: ['One', 'Two', 'Three'],
+      );
+      final repo = TaskRepository(db);
+      final ids = (await ordered(db, p)).map((t) => t.id).toList();
+      await repo.reorder(
+        worldId: world,
+        projectId: p,
+        ids: ids.reversed.toList(),
+      );
+      expect((await ordered(db, p)).map((t) => t.title), [
+        'Three',
+        'Two',
+        'One',
+      ]);
+      for (final invalid in [
+        ids.take(2).toList(),
+        [ids[0], ids[0], ids[2]],
+        [ids[0], ids[1], 'foreign'],
+      ]) {
+        await expectLater(
+          repo.reorder(worldId: world, projectId: p, ids: invalid),
+          throwsStateError,
+        );
+      }
+      await expectLater(
+        repo.reorder(worldId: 'other-world', projectId: p, ids: ids),
+        throwsStateError,
+      );
+      await db.customStatement(
+        "CREATE TRIGGER fail_drag BEFORE UPDATE OF position ON project_tasks WHEN OLD.id = '${ids[1]}' BEGIN SELECT RAISE(ABORT, 'failure'); END",
+      );
+      await expectLater(
+        repo.reorder(worldId: world, projectId: p, ids: ids),
+        throwsA(anything),
+      );
+      expect((await ordered(db, p)).map((t) => t.title), [
+        'Three',
+        'Two',
+        'One',
+      ]);
+    },
+  );
+
   for (final width in [390.0, 1280.0]) {
+    testWidgets('drag handles reorder saved and draft tasks at $width', (
+      tester,
+    ) async {
+      await tester.binding.setSurfaceSize(Size(width, 900));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      final db = AppDatabase.forTesting(NativeDatabase.memory());
+      addTearDown(db.close);
+      final world = await WorldRepository(
+        db,
+      ).save(name: 'Home', edition: 'Java');
+      final p = await ProjectRepository(db).save(
+        worldId: world,
+        name: 'Bridge',
+        initialTasks: ['One', 'Two', 'Three'],
+      );
+      final first = (await ordered(db, p)).first.id;
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [databaseProvider.overrideWithValue(db)],
+          child: MaterialApp(
+            theme: appTheme(width < 600 ? Brightness.dark : Brightness.light),
+            home: ProjectsScreen(worldId: world, worldName: 'Home'),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Bridge'));
+      await tester.pumpAndSettle();
+      Future<void> drag(Finder handle, Offset destination) async {
+        final gesture = await tester.startGesture(tester.getCenter(handle));
+        await gesture.moveBy(const Offset(0, 12));
+        await tester.pump(const Duration(milliseconds: 100));
+        final start = tester.getCenter(handle) + const Offset(0, 12);
+        for (var step = 1; step <= 10; step++) {
+          await gesture.moveTo(Offset.lerp(start, destination, step / 10)!);
+          await tester.pump(const Duration(milliseconds: 80));
+        }
+        await tester.pump(const Duration(milliseconds: 400));
+        await gesture.up();
+        await tester.pumpAndSettle();
+      }
+
+      await drag(
+        find.byKey(ValueKey('drag-$first')),
+        tester.getCenter(find.text('Three')) + const Offset(0, 55),
+      );
+      expect((await ordered(db, p)).map((t) => t.title), [
+        'Two',
+        'Three',
+        'One',
+      ]);
+      await drag(
+        find.byKey(ValueKey('drag-$first')),
+        tester.getCenter(find.text('Two')) - const Offset(0, 55),
+      );
+      expect((await ordered(db, p)).map((t) => t.title), [
+        'One',
+        'Two',
+        'Three',
+      ]);
+      await db.customStatement(
+        "CREATE TRIGGER fail_drag_ui BEFORE UPDATE OF position ON project_tasks BEGIN SELECT RAISE(ABORT, 'failure'); END",
+      );
+      await drag(
+        find.byKey(ValueKey('drag-$first')),
+        tester.getCenter(find.text('Three')) + const Offset(0, 55),
+      );
+      expect(
+        find.text('Could not save the task order. Please try again.'),
+        findsOneWidget,
+      );
+      expect((await ordered(db, p)).map((t) => t.title), [
+        'One',
+        'Two',
+        'Three',
+      ]);
+      await db.customStatement('DROP TRIGGER fail_drag_ui');
+      await tester.tap(find.byKey(ValueKey('complete-$first')));
+      await tester.pumpAndSettle();
+      expect(find.text('1 of 3 complete'), findsOneWidget);
+      await tester.tap(find.text('Close'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('New project'));
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.byKey(const ValueKey('project-name')),
+        'Tower',
+      );
+      for (final title in ['Stone', 'Walls']) {
+        await tester.ensureVisible(find.text('Add task'));
+        await tester.tap(find.text('Add task'));
+        await tester.pumpAndSettle();
+        final field = find.widgetWithText(TextFormField, 'Task name').last;
+        await tester.ensureVisible(field);
+        await tester.enterText(field, title);
+      }
+      final handles = find.byType(TaskDragHandle);
+      await tester.ensureVisible(handles.first);
+      await drag(
+        handles.first,
+        tester.getCenter(handles.last) + const Offset(0, 55),
+      );
+      await tester.tap(find.text('Save project'));
+      await tester.pumpAndSettle();
+      final tower = (await db.select(db.projects).get()).singleWhere(
+        (p) => p.name == 'Tower',
+      );
+      expect((await ordered(db, tower.id)).map((t) => t.title), [
+        'Walls',
+        'Stone',
+      ]);
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox());
+      await tester.pumpAndSettle();
+    });
+
     testWidgets('saved and draft task moves at $width', (tester) async {
       await tester.binding.setSurfaceSize(Size(width, 900));
       addTearDown(() => tester.binding.setSurfaceSize(null));

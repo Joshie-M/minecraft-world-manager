@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../app/labeled_field.dart';
 import '../../core/database/app_database.dart';
 import 'task_repository.dart';
+import 'task_drag_list.dart';
 
 class ProjectChecklist extends ConsumerStatefulWidget {
   const ProjectChecklist({
@@ -20,11 +21,44 @@ class ProjectChecklist extends ConsumerStatefulWidget {
 class _ProjectChecklistState extends ConsumerState<ProjectChecklist> {
   final pending = <String>{};
   String? error;
+  bool ordering = false;
+  Future<void> reorder(
+    List<ProjectTask> tasks,
+    int oldIndex,
+    int newIndex,
+  ) async {
+    if (ordering || pending.isNotEmpty) return;
+    if (newIndex == oldIndex) return;
+    final ids = tasks.map((t) => t.id).toList();
+    ids.insert(newIndex, ids.removeAt(oldIndex));
+    setState(() {
+      ordering = true;
+      error = null;
+    });
+    try {
+      await ref
+          .read(taskRepositoryProvider)
+          .reorder(
+            worldId: widget.worldId,
+            projectId: widget.projectId,
+            ids: ids,
+          );
+    } catch (_) {
+      if (mounted) {
+        setState(
+          () => error = 'Could not save the task order. Please try again.',
+        );
+      }
+    } finally {
+      if (mounted) setState(() => ordering = false);
+    }
+  }
+
   Future<void> change(
     ProjectTask task,
     Future<void> Function() operation,
   ) async {
-    if (pending.contains(task.id)) return;
+    if (ordering || pending.contains(task.id)) return;
     setState(() {
       pending.add(task.id);
       error = null;
@@ -97,7 +131,7 @@ class _ProjectChecklistState extends ConsumerState<ProjectChecklist> {
         children: [
           Text('Checklist', style: Theme.of(context).textTheme.titleMedium),
           TextButton.icon(
-            onPressed: () => edit(),
+            onPressed: ordering ? null : () => edit(),
             icon: const Icon(CupertinoIcons.plus, size: 14),
             label: const Text('Add task'),
           ),
@@ -132,92 +166,105 @@ class _ProjectChecklistState extends ConsumerState<ProjectChecklist> {
                         key: const ValueKey('task-progress'),
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
-                      for (final task in tasks)
-                        Row(
-                          children: [
-                            Checkbox(
-                              key: ValueKey('complete-${task.id}'),
-                              value: task.completed,
-                              onChanged: pending.contains(task.id)
-                                  ? null
-                                  : (value) => change(
-                                      task,
-                                      () => ref
-                                          .read(taskRepositoryProvider)
-                                          .setCompleted(
-                                            worldId: widget.worldId,
-                                            projectId: widget.projectId,
-                                            id: task.id,
-                                            completed: value!,
-                                          ),
-                                    ),
-                            ),
-                            Expanded(
-                              child: Text(
-                                task.title,
-                                style: TextStyle(
-                                  decoration: task.completed
-                                      ? TextDecoration.lineThrough
-                                      : null,
-                                  color: task.completed
-                                      ? Theme.of(
-                                          context,
-                                        ).colorScheme.onSurfaceVariant
-                                      : null,
+                      TaskDragList(
+                        onReorder: (oldIndex, newIndex) =>
+                            reorder(tasks, oldIndex, newIndex),
+                        children: [
+                          for (final task in tasks)
+                            Row(
+                              key: ValueKey(task.id),
+                              children: [
+                                TaskDragHandle(
+                                  key: ValueKey('drag-${task.id}'),
+                                  index: tasks.indexOf(task),
+                                  enabled: !ordering && pending.isEmpty,
                                 ),
-                              ),
-                            ),
-                            PopupMenuButton<String>(
-                              key: ValueKey('task-actions-${task.id}'),
-                              enabled: pending.isEmpty,
-                              tooltip: 'Task actions',
-                              icon: const Icon(
-                                CupertinoIcons.ellipsis,
-                                size: 16,
-                              ),
-                              onSelected: (value) {
-                                if (value == 'up' || value == 'down') {
-                                  change(
-                                    task,
-                                    () => ref
-                                        .read(taskRepositoryProvider)
-                                        .move(
-                                          worldId: widget.worldId,
-                                          projectId: widget.projectId,
-                                          id: task.id,
-                                          up: value == 'up',
+                                Checkbox(
+                                  key: ValueKey('complete-${task.id}'),
+                                  value: task.completed,
+                                  onChanged:
+                                      ordering || pending.contains(task.id)
+                                      ? null
+                                      : (value) => change(
+                                          task,
+                                          () => ref
+                                              .read(taskRepositoryProvider)
+                                              .setCompleted(
+                                                worldId: widget.worldId,
+                                                projectId: widget.projectId,
+                                                id: task.id,
+                                                completed: value!,
+                                              ),
                                         ),
-                                  );
-                                } else if (value == 'edit') {
-                                  edit(task);
-                                } else {
-                                  delete(task);
-                                }
-                              },
-                              itemBuilder: (_) => [
-                                PopupMenuItem(
-                                  value: 'up',
-                                  enabled: tasks.first.id != task.id,
-                                  child: const Text('Move up'),
                                 ),
-                                PopupMenuItem(
-                                  value: 'down',
-                                  enabled: tasks.last.id != task.id,
-                                  child: const Text('Move down'),
+                                Expanded(
+                                  child: Text(
+                                    task.title,
+                                    style: TextStyle(
+                                      decoration: task.completed
+                                          ? TextDecoration.lineThrough
+                                          : null,
+                                      color: task.completed
+                                          ? Theme.of(
+                                              context,
+                                            ).colorScheme.onSurfaceVariant
+                                          : null,
+                                    ),
+                                  ),
                                 ),
-                                const PopupMenuDivider(),
-                                const PopupMenuItem(
-                                  value: 'edit',
-                                  child: Text('Edit task'),
-                                ),
-                                const PopupMenuItem(
-                                  value: 'delete',
-                                  child: Text('Delete task'),
+                                PopupMenuButton<String>(
+                                  key: ValueKey('task-actions-${task.id}'),
+                                  enabled: !ordering && pending.isEmpty,
+                                  tooltip: 'Task actions',
+                                  icon: const Icon(
+                                    CupertinoIcons.ellipsis,
+                                    size: 16,
+                                  ),
+                                  onSelected: (value) {
+                                    if (value == 'up' || value == 'down') {
+                                      change(
+                                        task,
+                                        () => ref
+                                            .read(taskRepositoryProvider)
+                                            .move(
+                                              worldId: widget.worldId,
+                                              projectId: widget.projectId,
+                                              id: task.id,
+                                              up: value == 'up',
+                                            ),
+                                      );
+                                    } else if (value == 'edit') {
+                                      edit(task);
+                                    } else {
+                                      delete(task);
+                                    }
+                                  },
+                                  itemBuilder: (_) => [
+                                    PopupMenuItem(
+                                      value: 'up',
+                                      enabled: tasks.first.id != task.id,
+                                      child: const Text('Move up'),
+                                    ),
+                                    PopupMenuItem(
+                                      value: 'down',
+                                      enabled: tasks.last.id != task.id,
+                                      child: const Text('Move down'),
+                                    ),
+                                    const PopupMenuDivider(),
+                                    const PopupMenuItem(
+                                      value: 'edit',
+                                      child: Text('Edit task'),
+                                    ),
+                                    const PopupMenuItem(
+                                      value: 'delete',
+                                      child: Text('Delete task'),
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
-                          ],
-                        ),
+                        ],
+                      ),
                     ],
                   ),
           ),

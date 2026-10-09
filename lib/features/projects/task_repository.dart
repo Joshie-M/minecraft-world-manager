@@ -111,6 +111,30 @@ class TaskRepository {
     }
     await touch(projectId);
   });
+  Future<void> reorder({
+    required String worldId,
+    required String projectId,
+    required List<String> ids,
+  }) => db.transaction(() async {
+    await checkOwner(worldId, projectId);
+    final current = await (db.select(
+      db.projectTasks,
+    )..where((t) => t.projectId.equals(projectId))).get();
+    final known = current.map((t) => t.id).toSet();
+    if (ids.length != current.length ||
+        ids.toSet().length != ids.length ||
+        !ids.every(known.contains)) {
+      throw StateError('The checklist changed. Please try again.');
+    }
+    for (var position = 0; position < ids.length; position++) {
+      await (db.update(db.projectTasks)..where(
+            (t) => t.id.equals(ids[position]) & t.projectId.equals(projectId),
+          ))
+          .write(ProjectTasksCompanion(position: Value(position)));
+    }
+    await touch(projectId);
+  });
+
   Future<void> move({
     required String worldId,
     required String projectId,

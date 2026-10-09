@@ -7,7 +7,7 @@ notes, saved coordinates, world projects, search, and local SQLite persistence.
 
 - Linux release build succeeded.
 - Static analysis passed with no issues.
-- Fifty-three tests passed: disk CRUD/reopen, invalid data handling, world/journal UI CRUD, keyboard shortcuts,
+- Fifty-six tests passed: disk CRUD/reopen, invalid data handling, world/journal UI CRUD, keyboard shortcuts,
   world isolation, migrations, coordinate validation/clipboard copying, project/location relationships, inline @mentions/autocomplete/hover previews, project checklists, and responsive light/dark layouts.
 - The compiled desktop app created a world through its UI. After stopping and
   restarting the process, the world appeared again on its dashboard. A journal
@@ -172,7 +172,8 @@ Open a project from the world, its location, or a journal mention. In **Checklis
 choose **Add task**, name the step, and save. Check or uncheck a box to save its
 completion immediately. The task menu lets you rename or delete a step, with
 confirmation before deletion. Progress shows completed tasks out of the total.
-Use **Move up** or **Move down** in the task menu to arrange your build steps.
+Drag a task by its handle to arrange your build steps, or use **Move up** /
+**Move down** in the task menu.
 The first and last task disable moves beyond the ends. Order saves immediately
 and stays unchanged when tasks are renamed or completed. Changing a
 checklist updates the project's last-edit time but keeps its status unchanged;
@@ -194,7 +195,8 @@ within the current world and update as saved records change. Use ⌘F / Ctrl+F
 while in search to focus the field, or Clear search to start again.
 
 When creating a project, choose **Add task** under **Checklist (optional)** to
-prepare its initial checklist. Draft tasks can be edited, removed, or rearranged using their **Task order** menu
+prepare its initial checklist. Draft tasks can be edited, removed, or rearranged by dragging their handles or
+using their **Task order** menu
 before saving.
 The project and tasks save together; canceling discards both, and a failed save
 keeps your draft in the form. Existing projects keep their checklist controls in

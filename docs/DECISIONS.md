@@ -320,3 +320,22 @@ Three added tests cover disk reopen, end-position no-ops, invalid ownership and
 missing IDs, rollback after partial position writes, delete/add/move behavior,
 backup restore order, and saved/draft UI moves at phone dark and desktop light
 sizes. The full suite contains 53 tests.
+
+## Dragging checklist tasks
+
+Saved and draft task rows now share a reorderable list and an explicit drag handle.
+Dragging starts from the handle so text editing and checkbox interactions remain
+available. Move up/down menus remain for keyboard and precise stepwise movement.
+Dragged rows use a subdued surface rather than a heavy drop shadow.
+
+Saved drops send the ordered ID snapshot to a transaction that checks project
+ownership and requires every current task exactly once. Stale, duplicate, or
+foreign snapshots fail without partial writes. Updates touch only positions and
+project last-edit time. Busy writes disable new drags; the saved stream remains
+the source of order, and failed drops report an error. Draft drops rearrange keyed
+controllers and persist only with Save project. No schema or dependency changes.
+
+Three additional tests cover invalid snapshots and rollback, plus actual pointer
+drags in phone dark and desktop light layouts for saved and draft tasks, including
+movement in both directions, preserved checkbox state, and failed-drop recovery.
+The full suite contains 56 tests. Linux build checks are separate from Mac testing.
