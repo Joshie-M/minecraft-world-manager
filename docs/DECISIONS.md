@@ -73,3 +73,25 @@ and SQLite persistence remain intact. Added contextual open/edit actions and
 Command/Control keyboard shortcuts for creation and saving. See DESIGN.md for
 shared design tokens and component rules. Eight tests pass. Native macOS visual
 verification remains pending on the user's machine.
+
+## Journal milestone
+
+Schema version 2 adds world-owned JournalEntries with stable UUIDs, title,
+Markdown body, occurrence time, and creation/update timestamps. A version-1
+migration test verifies existing worlds survive. Foreign keys cascade world
+removal to its entries; updates/deletes require both entry and world IDs. Search
+is literal and case-insensitive across title/body within the selected world.
+Chronological order uses occurrence time, newest first.
+
+Shared desktop styling extends to a timeline and focused full-page editor.
+flutter_markdown_plus renders Markdown locally; remote images are not loaded.
+Explicit save feedback and dirty-editor discard confirmation are implemented;
+crash recovery/autosaved drafts are deferred and the editor says to save before
+closing the app. Missing-parent or deleted-entry saves preserve editor text and
+show errors. Images, tags, coordinate/link associations and date filters remain
+later increments. Next milestone: named coordinates.
+
+Journal validation: 13 tests passed, analysis found no issues, and the Linux
+release build succeeded. The compiled UI migrated a version-1 demo database,
+preserved three worlds, saved a Markdown entry, rendered its bold text and
+displayed the entry after process restart. macOS journal validation remains local.

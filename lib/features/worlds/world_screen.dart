@@ -8,6 +8,7 @@ import '../../app/theme.dart';
 import '../../app/labeled_field.dart';
 import '../../core/database/app_database.dart';
 import '../../main.dart';
+import '../journal/journal_screen.dart';
 
 class WorldScreen extends ConsumerWidget {
   const WorldScreen({super.key});
@@ -275,6 +276,22 @@ class WorldOverview extends ConsumerWidget {
                       'Added ${current.createdAt.toLocal().toString().split(' ').first}',
                     ),
                     const SizedBox(height: 24),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: OutlinedButton.icon(
+                        onPressed: () => Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (_) => JournalScreen(
+                              worldId: current.id,
+                              worldName: current.name,
+                            ),
+                          ),
+                        ),
+                        icon: const Icon(CupertinoIcons.book),
+                        label: const Text('Open journal'),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
                     Wrap(
                       spacing: 12,
                       runSpacing: 12,
@@ -292,7 +309,7 @@ class WorldOverview extends ConsumerWidget {
                               builder: (context) => AlertDialog(
                                 title: const Text('Delete world?'),
                                 content: Text(
-                                  'Permanently delete "${current.name}"? This cannot be undone.',
+                                  'Permanently delete "${current.name}" and its journal entries? This cannot be undone.',
                                 ),
                                 actions: [
                                   TextButton(

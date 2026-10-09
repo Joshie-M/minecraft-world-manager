@@ -1,20 +1,21 @@
 # Minecraft World Manager
 
-An offline Flutter companion for Minecraft. The first milestone supports a world
- dashboard, overview, create/edit/delete, and local SQLite persistence.
+An offline Flutter companion for Minecraft. The app supports world management and world-scoped journals with Markdown
+notes, chronological entries, search, and local SQLite persistence.
 
 ## Verified in this cloud environment
 
 - Linux release build succeeded.
 - Static analysis passed with no issues.
-- Eight tests passed: disk CRUD/reopen, invalid data handling, UI CRUD, keyboard shortcuts, and
-  narrow/wide layouts in light/dark themes with enlarged text.
+- Thirteen tests passed: disk CRUD/reopen, invalid data handling, world/journal UI CRUD, keyboard shortcuts,
+  world isolation, migrations, and responsive light/dark layouts.
 - The compiled desktop app created a world through its UI. After stopping and
-  restarting the process, the world appeared again on its dashboard.
+  restarting the process, the world appeared again on its dashboard. A journal
+  entry was also saved through the compiled UI and displayed after restart.
 
 Android, iOS, macOS and Windows runners are generated but those platforms have
 not been built or tested in this cloud environment. The user reported the original
-macOS app running locally; the redesigned macOS build awaits local verification. This is the world-management foundation, not the full MVP.
+macOS app running locally; the redesigned macOS build awaits local verification. This covers worlds and journals, not the full MVP.
 
 ## Design preview
 
@@ -75,3 +76,20 @@ required on your own computer.
 
 SQLite lives in the OS application-support directory; seeds and accounts are not
 required. See [development notes](docs/DECISIONS.md) for architecture and next steps.
+
+## Journal
+
+[Timeline preview](docs/screenshots/journal.png) · [Markdown preview](docs/screenshots/journal-entry.png)
+
+Open a world, choose **Open journal**, then **New entry**. Add a title, notes and
+an optional adjusted date/time. Use the bold/italic/list buttons or Markdown,
+then **Preview notes** to read the formatted result. **Save entry** (Command+Enter
+or Control+Enter) writes locally and returns to the timeline. Search matches title
+or note text without mixing worlds. The entry menu provides edit/delete actions.
+
+Schema version 2 adds journal entries automatically and preserves existing worlds.
+Deleting a world now deletes its journal entries after confirmation. Editing an
+entry preserves its original creation timestamp. Leaving an editor with changes
+asks before discarding. Unsaved edits are not crash-recovery drafts: save before
+quitting the app. Images, tags, coordinates and linked records are future features;
+Markdown images do not fetch remote files, and links are currently display-only.

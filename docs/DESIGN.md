@@ -43,7 +43,7 @@ claiming every control is an operating-system widget.
 
 ## Validation limits
 
-Eight tests exercise disk CRUD, invalid input, keyboard create/save, narrow/wide
-light/dark layouts at enlarged text size, and UI CRUD/deletion confirmation.
+Thirteen tests exercise disk CRUD, invalid input, keyboard create/save, narrow/wide
+light/dark layouts at enlarged text size, world/journal UI CRUD, Markdown preview, discard confirmation, migration, and world isolation.
 Linux is the cloud build target. macOS visual appearance and other native targets
 need local verification; the user's existing macOS install can test this update.
